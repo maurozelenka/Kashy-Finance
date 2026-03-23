@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# Project specific
+docs/
+scratch/
+TFG_Tipo_I_Software/
+
+# IDEs
+.vscode/
+.idea/
+
+# Privacy
+doc/info.txt
