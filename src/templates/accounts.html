@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Cuentas{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    
+    <!-- Formulario de creación -->
+    <div class="lg:col-span-5">
+        <article class="glass-card rounded-3xl p-8 sticky top-28">
+            <h2 class="text-2xl font-bold font-jakarta mb-2 text-white">Gestionar Cuentas</h2>
+            <p class="text-sm text-neutral-400 mb-8">Crea nuevos contenedores para tu capital.</p>
+            
+            <form action="{{ url_for('accounts.index') }}" method="POST" class="space-y-6">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2 font-jakarta">Nombre de la Cuenta</label>
+                    <input type="text" name="name" placeholder="Ej: Cuenta Corriente, Ahorros" required 
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2 font-jakarta">Saldo Inicial (€)</label>
+                    <input type="number" step="0.01" name="initial_balance" value="0.00" required
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none font-outfit">
+                </div>
+                <button type="submit" class="w-full bg-primary hover:bg-primary-dim text-black font-bold py-3 rounded-xl transition-all shadow-lg shadow-primary/20">
+                    Crear Nueva Cuenta
+                </button>
+            </form>
+        </article>
+    </div>
+
+    <!-- Lista de cuentas -->
+    <div class="lg:col-span-7">
+        <section class="glass-card rounded-3xl p-8">
+            <h3 class="text-lg font-bold font-jakarta text-white mb-6">Tus Cuentas Activas</h3>
+            
+            {% if cuentas %}
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-white/5">
+                                <th class="pb-4 text-[10px] font-bold uppercase tracking-widest text-neutral-500">Nombre</th>
+                                <th class="pb-4 text-[10px] font-bold uppercase tracking-widest text-neutral-500">Saldo Inicial</th>
+                                <th class="pb-4 text-[10px] font-bold uppercase tracking-widest text-neutral-500">Saldo Actual</th>
+                                <th class="pb-4 text-right text-[10px] font-bold uppercase tracking-widest text-neutral-500">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            {% for c in cuentas %}
+                            {% set saldo_real = saldos.get(c.__oid__|string, c.initial_balance) %}
+                            <tr class="group hover:bg-white/[0.02] transition-colors">
+                                <td class="py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                                            <span class="material-symbols-outlined text-sm text-primary">account_balance</span>
+                                        </div>
+                                        <span class="font-semibold text-white">{{ c.name }}</span>
+                                    </div>
+                                </td>
+                                <td class="py-4 font-outfit text-neutral-400">{{ "%.2f"|format(c.initial_balance) }} €</td>
+                                <td class="py-4 font-outfit font-bold {% if saldo_real >= 0 %}text-success{% else %}text-error{% endif %}">
+                                    {{ "%.2f"|format(saldo_real) }} €
+                                </td>
+                                <td class="py-4 text-right">
+                                    <form action="{{ url_for('accounts.delete', oid=c.__oid__) }}" method="POST" class="inline">
+                                        <button type="submit" onclick="return confirm('¿Borrar cuenta? Se borrarán todas las transacciones asociadas.');"
+                                            class="text-neutral-500 hover:text-error transition-colors">
+                                            <span class="material-symbols-outlined">delete</span>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-12">
+                    <span class="material-symbols-outlined text-4xl text-neutral-700 mb-4">account_balance_wallet</span>
+                    <p class="text-neutral-500">Aún no tienes cuentas registradas.</p>
+                </div>
+            {% endif %}
+        </section>
+    </div>
+</div>
+{% endblock %}
