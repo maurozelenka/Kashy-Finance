@@ -70,3 +70,4 @@ def logout():
     logout_user()
     flask.flash("Sesión cerrada.", "info")
     return flask.redirect(flask.url_for("auth.login"))
+ 
