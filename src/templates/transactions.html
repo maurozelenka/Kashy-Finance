@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}Transacciones{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    
+    <!-- Formulario de Nueva Transacción -->
+    <section class="glass-card rounded-3xl p-8">
+        <div class="flex items-center gap-4 mb-8">
+            <div class="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center border border-primary/30">
+                <span class="material-symbols-outlined text-primary">add_card</span>
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold font-jakarta text-white">Nueva Transacción</h2>
+                <p class="text-sm text-neutral-400">Registra un movimiento en tus cuentas.</p>
+            </div>
+        </div>
+        
+        <form action="{{ url_for('transactions.index') }}" method="POST" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2 font-jakarta">Monto (€)</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 font-bold">€</span>
+                    <input type="number" step="0.01" name="amount" required placeholder="0.00"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl pl-8 pr-4 py-3 text-white focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none font-outfit text-lg">
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2 font-jakarta">Fecha</label>
+                <input type="date" name="date_str" value="{{ today }}" required
+                    class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2 font-jakarta">Cuenta Origen</label>
+                <select name="acc_oid" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none appearance-none">
+                    <option value="" disabled selected>Selecciona cuenta...</option>
+                    {% for c in cuentas %}
+                        {% set saldo_real = saldos.get(c.__oid__|string, c.initial_balance) %}
+                        <option value="{{ c.__oid__ }}">{{ c.name }} — {{ "%.2f"|format(saldo_real) }} €</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2 font-jakarta">Categoría</label>
+                <select name="cat_oid" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none appearance-none">
+                    <option value="" disabled selected>Selecciona categoría...</option>
+                    {% for cat in categorias %}
+                        <option value="{{ cat.__oid__ }}">
+                            {{ cat.name }} [{% if cat.cat_type == 'ingreso' %}↑{% else %}↓{% endif %}]
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="lg:col-span-2">
+                <label class="block text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2 font-jakarta">Descripción / Notas</label>
+                <input type="text" name="notes" placeholder="Ej: Compra semanal, Nómina..." required
+                    class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none">
+            </div>
+
+            <div class="md:col-span-2 lg:col-span-3 pt-2">
+                <button type="submit" class="w-full bg-primary hover:bg-primary-dim text-black font-bold py-4 rounded-xl transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">save</span>
+                    Guardar Registro
+                </button>
+            </div>
+        </form>
+    </section>
+
+    <!-- Historial -->
+    <section class="glass-card rounded-3xl p-8">
+        <div class="flex justify-between items-center mb-8">
+            <h3 class="text-xl font-bold font-jakarta text-white">Historial de Movimientos</h3>
+            <div class="flex gap-2">
+                <button class="p-2 rounded-xl bg-white/5 border border-white/10 text-neutral-400 hover:text-white transition-all">
+                    <span class="material-symbols-outlined">filter_list</span>
+                </button>
+            </div>
+        </div>
+        
+        {% if transacciones %}
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-white/5">
+                            <th class="pb-4 text-[10px] font-bold uppercase tracking-widest text-neutral-500">Fecha</th>
+                            <th class="pb-4 text-[10px] font-bold uppercase tracking-widest text-neutral-500">Cuenta</th>
+                            <th class="pb-4 text-[10px] font-bold uppercase tracking-widest text-neutral-500">Categoría</th>
+                            <th class="pb-4 text-[10px] font-bold uppercase tracking-widest text-neutral-500">Notas</th>
+                            <th class="pb-4 text-[10px] font-bold uppercase tracking-widest text-neutral-500">Monto</th>
+                            <th class="pb-4 text-right text-[10px] font-bold uppercase tracking-widest text-neutral-500">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        {% for t in transacciones %}
+                        <tr class="searchable-item group hover:bg-white/[0.02] transition-all duration-300"
+                            data-search="{{ t.date_str }} {{ acc_map.get(t.acc_oid, '') }} {{ cat_map.get(t.cat_oid).name if t.cat_oid in cat_map else '' }} {{ t.notes }}">
+                            <td class="py-4 text-sm text-neutral-300 font-outfit">{{ t.date_str }}</td>
+                            <td class="py-4 text-sm text-white font-semibold">{{ acc_map.get(t.acc_oid, '---') }}</td>
+                            <td class="py-4">
+                                {% set cat = cat_map.get(t.cat_oid) %}
+                                {% if cat %}
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-6 h-6 rounded-full flex items-center justify-center shrink-0" style="background-color: {{ cat.color }}30;">
+                                            <span class="material-symbols-outlined text-xs leading-none" style="color: {{ cat.color }};">{{ cat.icon }}</span>
+                                        </div>
+                                        <span class="text-xs text-neutral-300">{{ cat.name }}</span>
+                                    </div>
+                                {% else %}
+                                    <span class="text-xs text-neutral-500 italic">Sin categoría</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-4 text-sm text-neutral-400">{{ t.notes }}</td>
+                            <td class="py-4">
+                                <span class="font-bold font-outfit {% if t.amount > 0 %}text-success{% else %}text-error{% endif %}">
+                                    {{ "%.2f"|format(t.amount) }} €
+                                </span>
+                            </td>
+                            <td class="py-4 text-right">
+                                <form action="{{ url_for('transactions.delete', oid_str=t.__oid__) }}" method="POST" class="inline">
+                                    <button type="submit" onclick="return confirm('¿Seguro?');"
+                                        class="text-neutral-500 hover:text-error transition-colors">
+                                        <span class="material-symbols-outlined">delete</span>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-20">
+                <div class="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <span class="material-symbols-outlined text-4xl text-neutral-700">receipt_long</span>
+                </div>
+                <p class="text-neutral-500 font-jakarta">No hay movimientos registrados.</p>
+            </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}
