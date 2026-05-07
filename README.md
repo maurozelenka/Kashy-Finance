@@ -82,3 +82,4 @@ The architecture is built with a focus on data privacy, strict adherence to Euro
 
 ## License
 Copyright (c) 2026 Kashy Finance. All rights reserved.
+ 
