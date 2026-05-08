@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html class="{% if current_user.is_authenticated %}{{ current_user.theme }}{% else %}dark{% endif %}" lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Kashy | {% block title %}Premium Wealth Management{% endblock %}</title>
+    
+    <!-- Scripts y Frameworks -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #080808;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 25px 25px;
+            background-attachment: fixed;
+            color: #ffffff;
+            -webkit-font-smoothing: antialiased;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Aurora Background Effect */
+        body::before {
+            content: "";
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.03) 0%, transparent 50%),
+                        radial-gradient(circle at 20% 30%, rgba(168, 85, 247, 0.02) 0%, transparent 40%),
+                        radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.02) 0%, transparent 40%);
+            animation: auroraMove 20s infinite alternate ease-in-out;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        @keyframes auroraMove {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(5%, 5%) rotate(5deg); }
+        }
+
+        /* Mouse Following Glow */
+        #mouse-glow {
+            position: fixed;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(168, 85, 247, 0.06) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -1;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.5s ease;
+            filter: blur(40px);
+        }
+
+        .font-outfit { font-family: 'Outfit', sans-serif; }
+        .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        .glass-card {
+            background: #0A0A0A;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease-out;
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 0 20px 40px rgba(168, 85, 247, 0.15);
+            border-color: rgba(168, 85, 247, 0.3);
+        }
+
+        /* Shine Effect */
+        .glass-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.05),
+                transparent
+            );
+            transition: 0.5s;
+            pointer-events: none;
+        }
+
+        .glass-card:hover::before {
+            left: 100%;
+        }
+
+        .luminous-glow {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .luminous-glow::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center, rgba(168, 85, 247, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        /* Notificaciones flotantes */
+        .toast-notification {
+            position: fixed;
+            top: 5rem;
+            right: 1.5rem;
+            z-index: 100;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        /* Scrollbar personalizado */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Active Nav Glow */
+        .active-nav-glow::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
+            animation: pulseGlow 2s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Floating Action Button Pulse */
+        .fab-pulse {
+            animation: fabPulse 2s infinite;
+        }
+
+        @keyframes fabPulse {
+            0% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(168, 85, 247, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); }
+        }
+    </style>
+
+    <script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary": "#ca98ff",
+                      "primary-dim": "#9c42f4",
+                      "surface": "#0e0e0e",
+                      "background": "#0e0e0e",
+                      "error": "#ff6e84",
+                      "success": "#b5f2b0"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              }
+            },
+          },
+        }
+    </script>
+</head>
+<body class="bg-background text-white selection:bg-primary/30 flex h-screen overflow-hidden">
+    <!-- Interactive Mouse Glow -->
+    <div id="mouse-glow"></div>
+
+    <!-- Flash Messages (Toasts) -->
+    <div id="toast-container" class="fixed top-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="toast-notification glass-card rounded-2xl p-4 flex items-center gap-3 border-l-4 {% if category == 'error' %}border-error{% else %}border-success{% endif %} shadow-2xl pointer-events-auto">
+                        <span class="material-symbols-outlined {% if category == 'error' %}text-error{% else %}text-success{% endif %}">
+                            {% if category == 'error' %}error{% else %}check_circle{% endif %}
+                        </span>
+                        <p class="text-sm font-semibold">{{ message }}</p>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    {% if current_user.is_authenticated %}
+    <!-- Sidebar (Figma Layout) -->
+    <aside class="hidden md:flex w-[260px] h-full border-r border-white/5 flex-col pt-8 pb-6 px-5 shrink-0 relative z-20" style="background-color: #0A0A0A;">
+        <!-- Logo -->
+        <div class="flex items-center gap-3 mb-10 px-2">
+            <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+                <span class="material-symbols-outlined text-black font-bold text-lg">stacked_line_chart</span>
+            </div>
+            <span class="text-xl font-bold tracking-tighter text-white font-jakarta">Kashy</span>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex flex-col gap-1.5 flex-1">
+            <a href="{{ url_for('dashboard.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all relative group {% if request.endpoint == 'dashboard.index' %}bg-primary/10 text-primary font-bold active-nav-glow{% else %}text-neutral-400 hover:text-white hover:bg-white/5 font-semibold{% endif %}">
+                <span class="material-symbols-outlined text-[20px]" {% if request.endpoint == 'dashboard.index' %}style="font-variation-settings: 'FILL' 1;"{% endif %}>home</span>
+                <span class="text-sm font-bold ml-2">{{ 'Dashboard' if current_user.language == 'en' else 'Inicio' }}</span>
+            </a>
+            <a href="{{ url_for('accounts.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all {% if request.endpoint == 'accounts.index' %}bg-primary/10 text-primary font-bold{% else %}text-neutral-400 hover:text-white hover:bg-white/5 font-semibold{% endif %}">
+                <span class="material-symbols-outlined text-[20px]" {% if request.endpoint == 'accounts.index' %}style="font-variation-settings: 'FILL' 1;"{% endif %}>account_balance_wallet</span>
+                <span class="text-sm">{{ 'Accounts' if current_user.language == 'en' else 'Cuentas' }}</span>
+            </a>
+            <a href="{{ url_for('transactions.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all {% if request.endpoint == 'transactions.index' %}bg-primary/10 text-primary font-bold{% else %}text-neutral-400 hover:text-white hover:bg-white/5 font-semibold{% endif %}">
+                <span class="material-symbols-outlined text-[20px]">sync_alt</span>
+                <span class="text-sm">{{ 'Transactions' if current_user.language == 'en' else 'Transacciones' }}</span>
+            </a>
+            <a href="{{ url_for('categories.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all {% if request.endpoint == 'categories.index' %}bg-primary/10 text-primary font-bold{% else %}text-neutral-400 hover:text-white hover:bg-white/5 font-semibold{% endif %}">
+                <span class="material-symbols-outlined text-[20px]" {% if request.endpoint == 'categories.index' %}style="font-variation-settings: 'FILL' 1;"{% endif %}>category</span>
+                <span class="text-sm">{{ 'Categories' if current_user.language == 'en' else 'Categorías' }}</span>
+            </a>
+            <a href="{{ url_for('budgets.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all {% if request.endpoint == 'budgets.index' %}bg-primary/10 text-primary font-bold{% else %}text-neutral-400 hover:text-white hover:bg-white/5 font-semibold{% endif %}">
+                <span class="material-symbols-outlined text-[20px]" {% if request.endpoint == 'budgets.index' %}style="font-variation-settings: 'FILL' 1;"{% endif %}>savings</span>
+                <span class="text-sm">{{ 'Budgets' if current_user.language == 'en' else 'Presupuestos' }}</span>
+            </a>
+            <a href="{{ url_for('savings.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all {% if request.endpoint == 'savings.index' %}bg-primary/10 text-primary font-bold{% else %}text-neutral-400 hover:text-white hover:bg-white/5 font-semibold{% endif %}">
+                <span class="material-symbols-outlined text-[20px]" {% if request.endpoint == 'savings.index' %}style="font-variation-settings: 'FILL' 1;"{% endif %}>schedule</span>
+                <span class="text-sm">{{ 'Savings' if current_user.language == 'en' else 'Ahorro' }}</span>
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-neutral-400 hover:text-white hover:bg-white/5 font-semibold">
+                <span class="material-symbols-outlined text-[20px]">monitoring</span>
+                <span class="text-sm">{{ 'Reports' if current_user.language == 'en' else 'Informes' }}</span>
+            </a>
+        </nav>
+
+        </nav>
+
+        <!-- User Profile -->
+        <div class="flex items-center gap-3 px-2 pt-4 border-t border-white/5">
+            <div class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white font-bold font-outfit border border-white/10 shrink-0 overflow-hidden">
+                {% if current_user.avatar_path %}
+                <img src="{{ url_for('static', filename=current_user.avatar_path) }}" alt="Avatar" class="w-full h-full object-cover">
+                {% else %}
+                {{ current_user.email[0] | upper }}
+                {% endif %}
+            </div>
+            <div class="flex flex-col flex-1 overflow-hidden">
+                <span class="text-sm font-bold text-white truncate">{{ current_user.email.split('@')[0] }}</span>
+                <span class="text-[10px] text-neutral-500 truncate">{{ current_user.email }}</span>
+            </div>
+            <a href="{{ url_for('auth.logout') }}" class="material-symbols-outlined text-neutral-500 hover:text-error transition-colors text-[18px]" title="Cerrar Sesión">expand_more</a>
+        </div>
+    </aside>
+    {% endif %}
+
+    <!-- Main Content Wrapper -->
+    <div class="flex-1 flex flex-col h-full relative z-10 w-full overflow-hidden">
+        
+        <!-- Top Header (Inside Main) -->
+        <header class="w-full px-6 md:px-10 py-6 md:py-8 flex justify-between items-start shrink-0">
+            <div>
+                {% block page_header %}
+                <!-- Dynamic title injected here from views -->
+                {% endblock %}
+            </div>
+            
+            <div class="flex items-center gap-4 md:gap-5">
+                {% if current_user.is_authenticated %}
+                <!-- New Transaction Button -->
+                <a href="{{ url_for('transactions.index') }}" class="flex items-center gap-2 bg-primary text-black px-4 py-2.5 rounded-full text-xs font-bold hover:scale-105 active:scale-95 transition-all shadow-[0_0_15px_rgba(168,85,247,0.3)] group shrink-0">
+                    <span class="material-symbols-outlined text-[18px] font-bold">add</span>
+                    <span class="hidden sm:inline">{{ 'New' if current_user.language == 'en' else 'Nueva' }}</span>
+                </a>
+                
+                <!-- Search -->
+                <div class="hidden sm:flex items-center bg-white/5 border border-white/5 rounded-full px-4 py-2.5 gap-2 w-64 focus-within:border-primary/40 transition-all duration-300">
+                    <span class="material-symbols-outlined text-[18px] text-neutral-500">search</span>
+                    <input id="global-search" class="bg-transparent border-none text-sm focus:ring-0 text-white placeholder:text-neutral-500 w-full outline-none" 
+                           placeholder="{{ 'Search...' if current_user.language == 'en' else 'Buscar...' }}" 
+                           type="text"
+                           oninput="runGlobalSearch(this.value)"/>
+                </div>
+                <!-- Notifications Dropdown -->
+                <div class="relative group">
+                    <button class="w-10 h-10 rounded-full border border-white/5 bg-white/5 flex items-center justify-center relative hover:bg-white/10 transition-colors shrink-0 cursor-default">
+                        <span class="material-symbols-outlined text-neutral-400 text-[20px]">notifications</span>
+                        <span class="absolute top-2.5 right-2.5 w-2 h-2 bg-primary rounded-full shadow-[0_0_8px_rgba(168,85,247,1)]"></span>
+                    </button>
+                    <!-- Menu -->
+                    <div class="absolute right-0 top-full mt-2 w-80 bg-[#0F0F0F] border border-white/10 rounded-2xl p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 z-50 shadow-2xl backdrop-blur-xl">
+                        <div class="px-4 py-3 border-b border-white/5 flex justify-between items-center">
+                            <span class="text-sm font-bold text-white">{{ 'Notifications' if current_user.language == 'en' else 'Notificaciones' }}</span>
+                            <span class="bg-primary/20 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full">3 {{ 'New' if current_user.language == 'en' else 'Nuevas' }}</span>
+                        </div>
+                        <div class="flex flex-col gap-1 p-2">
+                            <a href="#" class="flex gap-3 items-start p-2 rounded-xl hover:bg-white/5 transition-colors group/item">
+                                <div class="w-8 h-8 rounded-full bg-error/20 flex items-center justify-center shrink-0">
+                                    <span class="material-symbols-outlined text-error text-[16px]">warning</span>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-xs font-bold text-white group-hover/item:text-primary transition-colors">Presupuesto al límite</p>
+                                    <p class="text-[10px] text-neutral-400 mt-0.5">Tu categoría "Ocio" ha superado el 90%.</p>
+                                </div>
+                            </a>
+                            <a href="#" class="flex gap-3 items-start p-2 rounded-xl hover:bg-white/5 transition-colors group/item">
+                                <div class="w-8 h-8 rounded-full bg-success/20 flex items-center justify-center shrink-0">
+                                    <span class="material-symbols-outlined text-success text-[16px]">payments</span>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-xs font-bold text-white group-hover/item:text-primary transition-colors">Ingreso detectado</p>
+                                    <p class="text-[10px] text-neutral-400 mt-0.5">Se ha registrado "+1,850 €" (Nómina).</p>
+                                </div>
+                            </a>
+                            <a href="#" class="flex gap-3 items-start p-2 rounded-xl hover:bg-white/5 transition-colors group/item">
+                                <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                                    <span class="material-symbols-outlined text-primary text-[16px]">new_releases</span>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-xs font-bold text-white group-hover/item:text-primary transition-colors">Novedad Kashy</p>
+                                    <p class="text-[10px] text-neutral-400 mt-0.5">Prueba los nuevos widgets interactivos.</p>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="px-4 py-2 border-t border-white/5 text-center">
+                            <a href="#" class="text-[10px] font-bold text-neutral-500 hover:text-white transition-colors uppercase tracking-widest">Marcar todas como leídas</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Profile Dropdown -->
+                <div class="relative group">
+                    <button class="w-10 h-10 rounded-full bg-white/10 border border-white/10 flex items-center justify-center hover:border-primary/50 hover:shadow-[0_0_15px_rgba(168,85,247,0.3)] transition-all shrink-0 cursor-default overflow-hidden">
+                        <!-- Default Avatar or User Photo -->
+                        {% if current_user.avatar_path %}
+                        <img id="header-avatar-img" src="{{ url_for('static', filename=current_user.avatar_path) }}" alt="Avatar" class="w-full h-full object-cover">
+                        {% else %}
+                        <span id="header-avatar-text" class="font-outfit font-bold text-sm text-white group-hover:text-primary transition-colors">{{ current_user.email[0] | upper }}</span>
+                        {% endif %}
+                    </button>
+                    <!-- Menu -->
+                    <div class="absolute right-0 top-full mt-2 w-64 bg-[#0F0F0F] border border-white/10 rounded-2xl p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 z-50 shadow-2xl backdrop-blur-xl">
+                        
+                        <!-- Header -->
+                        <div class="px-4 py-4 border-b border-white/5 flex flex-col gap-1">
+                            <p class="text-sm font-bold text-white truncate">{{ current_user.email.split('@')[0] }}</p>
+                            <p class="text-[10px] text-neutral-400 truncate">{{ current_user.email }}</p>
+                            <span class="mt-2 bg-gradient-to-r from-primary to-primary/50 text-black text-[9px] font-bold px-2 py-0.5 rounded-full w-max uppercase tracking-widest">Usuario Premium</span>
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="flex flex-col gap-1 p-2">
+                            <button onclick="openModal('modal-avatar')" class="flex items-center gap-3 px-3 py-2 rounded-xl text-neutral-300 hover:text-white hover:bg-white/5 transition-colors text-xs font-semibold w-full text-left">
+                                <span class="material-symbols-outlined text-[16px] text-neutral-500">account_circle</span>
+                                {{ 'Change Profile Picture' if current_user.language == 'en' else 'Cambiar Foto de Perfil' }}
+                            </button>
+                            <button onclick="openModal('modal-password')" class="flex items-center gap-3 px-3 py-2 rounded-xl text-neutral-300 hover:text-white hover:bg-white/5 transition-colors text-xs font-semibold w-full text-left">
+                                <span class="material-symbols-outlined text-[16px] text-neutral-500">lock</span>
+                                {{ 'Change Password' if current_user.language == 'en' else 'Cambiar Contraseña' }}
+                            </button>
+                            <button onclick="toggleLanguage()" class="flex items-center justify-between px-3 py-2 rounded-xl text-neutral-300 hover:text-white hover:bg-white/5 transition-colors text-xs font-semibold w-full text-left">
+                                <div class="flex items-center gap-3">
+                                    <span class="material-symbols-outlined text-[16px] text-neutral-500">translate</span>
+                                    {{ 'Language' if current_user.language == 'en' else 'Idioma' }}
+                                </div>
+                                <span id="current-lang" class="text-[10px] text-neutral-500 uppercase">{{ current_user.language | default('ES') }}</span>
+                            </button>
+                            
+                            <!-- Toggle Tema -->
+                            <div class="my-1 border-t border-white/5"></div>
+                            <button class="flex items-center justify-between px-3 py-2 rounded-xl text-neutral-300 hover:text-white hover:bg-white/5 transition-colors text-xs font-semibold w-full text-left" onclick="toggleTheme()">
+                                <div class="flex items-center gap-3">
+                                    <span class="material-symbols-outlined text-[16px] text-neutral-500">dark_mode</span>
+                                    {{ 'Dark Mode' if current_user.language == 'en' else 'Modo Oscuro' }}
+                                </div>
+                                <div class="w-8 h-4 bg-primary/20 rounded-full relative">
+                                    <div id="theme-toggle-dot" class="w-4 h-4 bg-primary rounded-full absolute {% if current_user.theme == 'dark' %}right-0{% else %}left-0{% endif %} shadow-[0_0_5px_rgba(168,85,247,0.5)] transition-all"></div>
+                                </div>
+                            </button>
+                        </div>
+                        
+                        <!-- Logout -->
+                        <div class="p-2 border-t border-white/5">
+                            <a href="{{ url_for('auth.logout') }}" class="flex items-center gap-3 px-3 py-2 rounded-xl text-error/80 hover:text-error hover:bg-error/10 transition-colors text-xs font-semibold w-full">
+                                <span class="material-symbols-outlined text-[16px]">logout</span>
+                                {{ 'Log Out' if current_user.language == 'en' else 'Cerrar Sesión' }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <a href="{{ url_for('auth.login') }}" class="text-neutral-400 hover:text-white transition-colors text-sm font-semibold">Entrar</a>
+                <a href="{{ url_for('auth.register') }}" class="bg-primary text-black px-5 py-2 rounded-full text-sm font-bold hover:scale-105 transition-all">Registrarse</a>
+                {% endif %}
+            </div>
+        </header>
+
+        <!-- Scrollable Content Area -->
+        <main class="flex-1 overflow-y-auto px-6 md:px-10 pb-20 custom-scrollbar">
+            <div class="max-w-[1600px] mx-auto w-full">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <!-- BottomNavBar (Mobile) -->
+    {% if current_user.is_authenticated %}
+    <nav class="md:hidden fixed bottom-0 left-0 w-full bg-[#0A0A0A] border-t border-white/10 z-50 flex justify-around items-center pt-3 pb-6 px-4">
+        <a class="flex flex-col items-center justify-center {% if request.endpoint == 'dashboard.index' %}text-primary{% else %}text-neutral-500{% endif %}" href="{{ url_for('dashboard.index') }}">
+            <span class="material-symbols-outlined" style="{% if request.endpoint == 'dashboard.index' %}font-variation-settings: 'FILL' 1;{% endif %}">home</span>
+            <span class="text-[10px] uppercase font-bold mt-1">{{ 'Home' if current_user.language == 'en' else 'Inicio' }}</span>
+        </a>
+        <a class="flex flex-col items-center justify-center {% if request.endpoint == 'accounts.index' %}text-primary{% else %}text-neutral-500{% endif %}" href="{{ url_for('accounts.index') }}">
+            <span class="material-symbols-outlined" style="{% if request.endpoint == 'accounts.index' %}font-variation-settings: 'FILL' 1;{% endif %}">account_balance_wallet</span>
+            <span class="text-[10px] uppercase font-bold mt-1">{{ 'Accounts' if current_user.language == 'en' else 'Cuentas' }}</span>
+        </a>
+        <a class="flex flex-col items-center justify-center {% if request.endpoint == 'transactions.index' %}text-primary{% else %}text-neutral-500{% endif %}" href="{{ url_for('transactions.index') }}">
+            <span class="material-symbols-outlined">sync_alt</span>
+            <span class="text-[10px] uppercase font-bold mt-1">{{ 'Activity' if current_user.language == 'en' else 'Actividad' }}</span>
+        </a>
+        <a class="flex flex-col items-center justify-center {% if request.endpoint == 'categories.index' %}text-primary{% else %}text-neutral-500{% endif %}" href="{{ url_for('categories.index') }}">
+            <span class="material-symbols-outlined" style="{% if request.endpoint == 'categories.index' %}font-variation-settings: 'FILL' 1;{% endif %}">category</span>
+            <span class="text-[10px] uppercase font-bold mt-1">{{ 'Categories' if current_user.language == 'en' else 'Categorías' }}</span>
+        </a>
+    </nav>
+    {% endif %}
+
+    <!-- Modals para Configuración -->
+    {% if current_user.is_authenticated %}
+    <!-- Modal Cambiar Foto -->
+    <div id="modal-avatar" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center opacity-0 transition-opacity">
+        <div class="bg-[#0F0F0F] border border-white/10 p-6 rounded-3xl w-[90%] max-w-sm transform scale-95 transition-transform">
+            <h3 class="text-white font-bold mb-4 font-outfit text-center">{{ 'Change Profile Picture' if current_user.language == 'en' else 'Cambiar Foto de Perfil' }}</h3>
+            
+            <!-- Preview Circle -->
+            <div class="flex justify-center mb-6">
+                <div class="w-24 h-24 rounded-full overflow-hidden border-2 border-primary/30 p-1 bg-white/5">
+                    <div class="w-full h-full rounded-full overflow-hidden relative">
+                        {% if current_user.avatar_path %}
+                            <img id="avatar-preview" src="{{ url_for('static', filename=current_user.avatar_path) }}" class="w-full h-full object-cover">
+                        {% else %}
+                            <div id="avatar-preview-placeholder" class="w-full h-full bg-primary flex items-center justify-center text-black text-2xl font-bold font-outfit uppercase">
+                                {{ current_user.email[0] }}
+                            </div>
+                            <img id="avatar-preview" class="w-full h-full object-cover hidden">
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <form id="form-avatar" onsubmit="uploadAvatar(event)">
+                <input type="file" id="avatar-file" accept="image/*" class="w-full text-sm text-neutral-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer mb-6" onchange="previewAvatar(event)">
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeModal('modal-avatar')" class="flex-1 px-4 py-2 rounded-full border border-white/10 text-neutral-400 text-sm font-bold hover:bg-white/5 transition-colors">{{ 'Cancel' if current_user.language == 'en' else 'Cancelar' }}</button>
+                    <button type="submit" class="flex-1 px-4 py-2 rounded-full bg-primary text-black text-sm font-bold hover:scale-105 transition-transform">{{ 'Upload' if current_user.language == 'en' else 'Subir Foto' }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Cambiar Contraseña -->
+    <div id="modal-password" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center opacity-0 transition-opacity">
+        <div class="bg-[#0F0F0F] border border-white/10 p-6 rounded-3xl w-[90%] max-w-sm transform scale-95 transition-transform">
+            <h3 class="text-white font-bold mb-4 font-outfit">Cambiar Contraseña</h3>
+            <form id="form-password" onsubmit="changePassword(event)" class="flex flex-col gap-3">
+                <input type="password" id="current-pw" placeholder="Contraseña actual" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-primary outline-none" required>
+                <input type="password" id="new-pw" placeholder="Nueva contraseña" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:border-primary outline-none" required>
+                <div class="flex gap-2 mt-2">
+                    <button type="button" onclick="closeModal('modal-password')" class="flex-1 px-4 py-2 rounded-full border border-white/10 text-neutral-400 text-sm font-bold hover:bg-white/5 transition-colors">Cancelar</button>
+                    <button type="submit" class="flex-1 px-4 py-2 rounded-full bg-primary text-black text-sm font-bold hover:scale-105 transition-transform">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Lógica de Configuración (Frontend) -->
+    <script>
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.remove('hidden');
+            // Trigger reflow
+            void modal.offsetWidth;
+            modal.classList.remove('opacity-0');
+            modal.querySelector('div').classList.remove('scale-95');
+        }
+
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.add('opacity-0');
+            modal.querySelector('div').classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function previewAvatar(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById('avatar-preview');
+                    const placeholder = document.getElementById('avatar-preview-placeholder');
+                    img.src = e.target.result;
+                    img.classList.remove('hidden');
+                    if(placeholder) placeholder.classList.add('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function toggleTheme() {
+            try {
+                const res = await fetch('{{ url_for("settings.toggle_theme") }}', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                });
+                const data = await res.json();
+                if(data.success) {
+                    if(data.theme === 'dark') {
+                        document.documentElement.classList.add('dark');
+                        document.getElementById('theme-toggle-dot').classList.replace('left-0', 'right-0');
+                        showToast('Modo Oscuro activado', 'success');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                        document.getElementById('theme-toggle-dot').classList.replace('right-0', 'left-0');
+                        showToast('Modo Claro activado', 'success');
+                    }
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        async function toggleLanguage() {
+            const currentLang = document.getElementById('current-lang').innerText.toLowerCase();
+            const newLang = currentLang === 'es' ? 'en' : 'es';
+            try {
+                const res = await fetch('{{ url_for("settings.change_language") }}', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({language: newLang})
+                });
+                const data = await res.json();
+                if(data.success) {
+                    showToast(`Idioma cambiado a ${data.language.toUpperCase()}`, 'success');
+                    // Recargar la página para que Jinja aplique las traducciones
+                    setTimeout(() => location.reload(), 800);
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        async function uploadAvatar(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('avatar-file');
+            if(!fileInput.files.length) return showToast('Selecciona una imagen', 'error');
+            
+            const formData = new FormData();
+            formData.append('avatar', fileInput.files[0]);
+            
+            try {
+                const res = await fetch('{{ url_for("settings.upload_avatar") }}', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if(data.success) {
+                    showToast('¡Foto de perfil actualizada!', 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast(data.error, 'error');
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        async function changePassword(e) {
+            e.preventDefault();
+            const current = document.getElementById('current-pw').value;
+            const newpw = document.getElementById('new-pw').value;
+            
+            try {
+                const res = await fetch('{{ url_for("settings.change_password") }}', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({current_password: current, new_password: newpw})
+                });
+                const data = await res.json();
+                if(data.success) {
+                    showToast('¡Contraseña cambiada correctamente!', 'success');
+                    closeModal('modal-password');
+                } else {
+                    showToast(data.error, 'error');
+                }
+            } catch(e) { console.error(e); }
+        }
+        
+        // Custom Toast Function
+        function showToast(message, type='success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-success/20' : 'bg-error/20';
+            const textColor = type === 'success' ? 'text-success' : 'text-error';
+            const icon = type === 'success' ? 'check_circle' : 'error';
+            
+            toast.className = `toast-notification flex items-center gap-3 px-4 py-3 rounded-2xl border border-white/10 glass-card backdrop-blur-xl animate-fade-up shadow-2xl`;
+            toast.innerHTML = `
+                <span class="material-symbols-outlined ${textColor}">${icon}</span>
+                <span class="text-sm font-bold text-white">${message}</span>
+            `;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(20px)';
+                toast.style.transition = 'all 0.5s ease';
+                setTimeout(() => toast.remove(), 500);
+            }, 3000);
+        }
+
+        // Global Search Logic
+        function runGlobalSearch(query) {
+            const q = query.toLowerCase().trim();
+            const items = document.querySelectorAll('.searchable-item');
+            let found = 0;
+
+            items.forEach(item => {
+                const searchData = (item.getAttribute('data-search') || "").toLowerCase();
+                // También buscamos en el texto visible por si acaso
+                const visibleText = item.innerText.toLowerCase();
+                
+                if (searchData.includes(q) || visibleText.includes(q)) {
+                    item.style.display = '';
+                    item.style.opacity = '1';
+                    found++;
+                } else {
+                    item.style.display = 'none';
+                    item.style.opacity = '0';
+                }
+            });
+
+            // Feedback visual if no results
+            const existingNoResults = document.getElementById('search-no-results');
+            const trMsg = document.getElementById('search-no-results-tr');
+            
+            if (found === 0 && q !== '') {
+                if (!existingNoResults && !trMsg) {
+                    const msg = document.createElement('div');
+                    msg.id = 'search-no-results';
+                    msg.className = 'text-center py-12 text-neutral-500 italic w-full col-span-full';
+                    msg.innerHTML = `
+                        <span class="material-symbols-outlined text-4xl mb-4 block">search_off</span>
+                        ${'{{ current_user.language }}' === 'en' ? 'No results found' : 'No se han encontrado resultados'} para "${query}"
+                    `;
+                    
+                    const tbody = document.querySelector('tbody');
+                    const spaceY = document.querySelector('.space-y-6');
+                    
+                    if (tbody) {
+                        const tr = document.createElement('tr');
+                        tr.id = 'search-no-results-tr';
+                        tr.innerHTML = `<td colspan="100" class="py-10">${msg.outerHTML}</td>`;
+                        tbody.appendChild(tr);
+                    } else if (spaceY) {
+                        spaceY.appendChild(msg);
+                    }
+                }
+            } else {
+                if (existingNoResults) existingNoResults.remove();
+                if (trMsg) trMsg.remove();
+            }
+        }
+    </script>
+    {% endif %}
+
+    <style>
+        /* Custom Scrollbar for Main Content */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Hack Modo Claro usando Filtro CSS (Mantiene tonos pero invierte luminosidad) */
+        html:not(.dark) {
+            background-color: #f2f2f2; /* Fondo claro general */
+        }
+        html:not(.dark) body {
+            filter: invert(0.9) hue-rotate(180deg) brightness(0.95);
+            background-color: #080808; 
+        }
+        /* Des-invertir imágenes y gráficos para que mantengan sus colores originales */
+        html:not(.dark) img,
+        html:not(.dark) svg,
+        html:not(.dark) .toast-notification {
+            filter: invert(1.1) hue-rotate(180deg) brightness(1.05);
+        }
+        
+        /* Ajustar el color de las tarjetas en Modo Claro para que sean un gris más suave */
+        html:not(.dark) .glass-card {
+            background: rgba(30, 30, 30, 0.4) !important;
+            border-color: rgba(0, 0, 0, 0.05) !important;
+        }
+    </style>
+
+    <script>
+        // Auto-eliminar notificaciones
+        setTimeout(() => {
+            const flashes = document.querySelectorAll('.toast-notification');
+            flashes.forEach(f => {
+                f.style.opacity = '0';
+                f.style.transform = 'translateX(20px)';
+                f.style.transition = 'all 0.5s ease';
+                setTimeout(() => f.remove(), 500);
+            });
+        }, 4000);
+
+        // Lógica del Mouse Glow Global
+        const glow = document.getElementById('mouse-glow');
+        window.addEventListener('mousemove', (e) => {
+            // Usar requestAnimationFrame para un movimiento ultra-suave
+            window.requestAnimationFrame(() => {
+                glow.style.left = e.clientX + 'px';
+                glow.style.top = e.clientY + 'px';
+            });
+        });
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

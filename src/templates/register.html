@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Registro{% endblock %}
+
+{% block content %}
+<div class="flex flex-col items-center justify-center min-h-[60vh]">
+    <div class="w-full max-w-lg">
+        <article class="glass-card luminous-glow rounded-3xl p-10 shadow-2xl relative overflow-hidden">
+            <div class="relative z-10">
+                <div class="flex flex-col items-center text-center mb-10">
+                    <div class="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 border border-primary/20">
+                        <span class="material-symbols-outlined text-4xl text-primary" style="font-variation-settings: 'FILL' 1;">stacked_line_chart</span>
+                    </div>
+                    <h2 class="text-3xl font-extrabold font-jakarta tracking-tight text-white mb-2">Crear Cuenta</h2>
+                    <p class="text-neutral-400 font-jakarta">Únete a la nueva generación de gestión financiera.</p>
+                </div>
+                
+                <form action="{{ url_for('auth.register') }}" method="POST" class="space-y-6">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2 font-jakarta">Email Principal</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-neutral-500">alternate_email</span>
+                            <input type="email" name="email" placeholder="¿Cuál es tu correo?" required 
+                                class="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2 font-jakarta">Definir Contraseña</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-neutral-500">lock_reset</span>
+                            <input type="password" name="password" placeholder="Mínimo 8 caracteres" required 
+                                class="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none font-outfit">
+                        </div>
+                        <p class="text-[10px] text-neutral-600 mt-2 italic">* Las contraseñas se almacenan de forma segura mediante hashing.</p>
+                    </div>
+
+                    <button type="submit" class="w-full bg-primary hover:bg-primary-dim text-black font-bold py-4 rounded-xl transition-all shadow-xl shadow-primary/20 transform hover:-translate-y-1">
+                        {{ 'Start Now' if current_user.language == 'en' else 'Empezar Ahora' }}
+                    </button>
+                </form>
+
+
+
+                <div class="mt-10 pt-6 border-t border-white/5 text-center">
+                    <p class="text-sm text-neutral-400">¿Ya eres miembro? 
+                        <a href="{{ url_for('auth.login') }}" class="text-primary font-bold hover:underline">Inicia Sesión</a>
+                    </p>
+                </div>
+            </div>
+        </article>
+    </div>
+</div>
+{% endblock %}
