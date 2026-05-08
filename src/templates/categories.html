@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Categorías{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    
+    <!-- Nueva Categoría -->
+    <div class="lg:col-span-4">
+        <article class="glass-card rounded-3xl p-8 sticky top-28">
+            <h2 class="text-2xl font-bold font-jakarta mb-2 text-white">Categorías</h2>
+            <p class="text-sm text-neutral-400 mb-8">Organiza tus ingresos y gastos por grupos.</p>
+            
+            <form action="{{ url_for('categories.index') }}" method="POST" class="space-y-6">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2 font-jakarta">Nombre de la Categoría</label>
+                    <input type="text" name="name" placeholder="Ej: Supermercado..." required 
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none">
+                </div>
+                
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-neutral-500 mb-3 font-jakarta">Icono Representativo</label>
+                    <div class="grid grid-cols-6 gap-2 max-h-48 overflow-y-auto p-2 bg-white/5 rounded-xl border border-white/10 custom-scrollbar">
+                        {% set icons = [
+                            'restaurant', 'lunch_dining', 'local_cafe', 'directions_car', 'directions_bus', 'flight', 
+                            'home', 'lightbulb', 'water_drop', 'sports_esports', 'movie', 'palette', 
+                            'shopping_bag', 'checkroom', 'medication', 'medical_services', 'menu_book', 'school', 
+                            'payments', 'trending_up', 'account_balance', 'category', 'settings', 'redeem', 
+                            'pets', 'fitness_center', 'spa', 'face', 'celebration', 'shopping_cart'
+                        ] %}
+                        {% for icon in icons %}
+                        <label class="cursor-pointer">
+                            <input type="radio" name="icon" value="{{ icon }}" class="hidden peer" {% if icon == 'category' %}checked{% endif %}>
+                            <div class="w-full aspect-square flex items-center justify-center rounded-lg border border-transparent hover:bg-white/5 transition-all peer-checked:bg-primary/20 peer-checked:border-primary">
+                                <span class="material-symbols-outlined text-xl">{{ icon }}</span>
+                            </div>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2 font-jakarta">Tipo de Flujo</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="type" value="gasto" class="hidden peer" checked>
+                            <div class="peer-checked:bg-error/20 peer-checked:border-error border border-white/10 bg-white/5 rounded-xl p-3 text-center transition-all">
+                                <span class="text-xs font-bold text-neutral-400 peer-checked:text-error uppercase">Gasto</span>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="type" value="ingreso" class="hidden peer">
+                            <div class="peer-checked:bg-success/20 peer-checked:border-success border border-white/10 bg-white/5 rounded-xl p-3 text-center transition-all">
+                                <span class="text-xs font-bold text-neutral-400 peer-checked:text-success uppercase">Ingreso</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2 font-jakarta">Etiqueta de Color</label>
+                    <input type="color" name="color" value="#ca98ff" class="w-full h-12 bg-white/5 border border-white/10 rounded-xl cursor-pointer">
+                </div>
+                <button type="submit" class="w-full bg-primary hover:bg-primary-dim text-black font-bold py-3 rounded-xl transition-all shadow-lg shadow-primary/20">
+                    Guardar Categoría
+                </button>
+            </form>
+        </article>
+    </div>
+
+    <!-- Lista -->
+    <div class="lg:col-span-8">
+        <section class="glass-card rounded-3xl p-8">
+            <h3 class="text-lg font-bold font-jakarta text-white mb-6">Listado de Categorías</h3>
+            
+            {% if categorias %}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {% for cat in categorias %}
+                    <div class="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 transition-all group">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center border-2 border-white/10 shrink-0" style="background-color: {{ cat.color }}40; border-color: {{ cat.color }};">
+                                <span class="material-symbols-outlined text-white text-xl">{{ cat.icon }}</span>
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-white">{{ cat.name }}</p>
+                                <p class="text-[10px] font-bold uppercase tracking-widest {% if cat.cat_type == 'ingreso' %}text-success{% else %}text-error{% endif %}">
+                                    {{ cat.cat_type }}
+                                </p>
+                            </div>
+                        </div>
+                        <form action="{{ url_for('categories.delete', oid=cat.__oid__) }}" method="POST" class="opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button type="submit" onclick="return confirm('¿Seguro que deseas eliminar esta categoría?');"
+                                class="text-neutral-500 hover:text-error transition-colors">
+                                <span class="material-symbols-outlined">delete</span>
+                            </button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-12">
+                    <span class="material-symbols-outlined text-4xl text-neutral-700 mb-4">category</span>
+                    <p class="text-neutral-500">No tienes categorías configuradas.</p>
+                </div>
+            {% endif %}
+        </section>
+    </div>
+</div>
+{% endblock %}
