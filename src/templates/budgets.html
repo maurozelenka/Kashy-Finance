@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Presupuestos{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    
+    <!-- Formulario de Nuevo Presupuesto -->
+    <section class="glass-card rounded-3xl p-8">
+        <div class="flex items-center gap-4 mb-8">
+            <div class="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center border border-primary/30">
+                <span class="material-symbols-outlined text-primary">account_balance_wallet</span>
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold font-jakarta text-white">Presupuestos Mensuales</h2>
+                <p class="text-sm text-neutral-400">Establece límites de gasto por categoría para <span class="text-primary font-semibold">{{ mes_label }}</span>.</p>
+            </div>
+        </div>
+        
+        {% if cats_sin_budget %}
+        <form action="{{ url_for('budgets.index') }}" method="POST" class="flex flex-col sm:flex-row gap-4">
+            <div class="flex-1">
+                <label class="block text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2 font-jakarta">Categoría de Gasto</label>
+                <select name="cat_oid" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none appearance-none">
+                    <option value="" disabled selected>Selecciona categoría...</option>
+                    {% for cat in cats_sin_budget %}
+                    <option value="{{ cat.__oid__ }}">{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="flex-1">
+                <label class="block text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2 font-jakarta">Límite Mensual (€)</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 font-bold">€</span>
+                    <input type="number" step="0.01" min="1" name="limit_amount" required placeholder="200.00"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl pl-8 pr-4 py-3 text-white focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none font-outfit text-lg">
+                </div>
+            </div>
+            <div class="flex items-end">
+                <button type="submit" class="bg-primary hover:bg-primary-dim text-black font-bold py-3 px-6 rounded-xl transition-all shadow-lg shadow-primary/20 flex items-center gap-2 whitespace-nowrap">
+                    <span class="material-symbols-outlined">add</span>
+                    Crear
+                </button>
+            </div>
+        </form>
+        {% else %}
+        <p class="text-neutral-500 text-sm text-center py-4">Todas tus categorías de gasto ya tienen presupuesto asignado. 🎯</p>
+        {% endif %}
+    </section>
+
+    <!-- Lista de Presupuestos -->
+    <section class="glass-card rounded-3xl p-8">
+        <h3 class="text-xl font-bold font-jakarta text-white mb-8">Control de Gasto</h3>
+        
+        {% if budget_data %}
+        <div class="space-y-5">
+            {% for b in budget_data %}
+            <div class="bg-white/[0.03] rounded-2xl p-5 border border-white/5 hover:border-white/10 transition-all">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-3 h-3 rounded-full shadow-lg" style="background-color: {{ b.cat_color }}; box-shadow: 0 0 12px {{ b.cat_color }};"></div>
+                        <div>
+                            <h4 class="text-white font-bold font-jakarta">{{ b.cat_name }}</h4>
+                            <p class="text-[11px] text-neutral-500">{{ "%.2f"|format(b.spent) }}€ de {{ "%.0f"|format(b.limit) }}€</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-sm font-bold font-outfit {% if b.over %}text-error{% elif b.pct > 75 %}text-yellow-400{% else %}text-success{% endif %}">
+                            {{ "%.0f"|format(b.pct) }}%
+                        </span>
+                        <form action="{{ url_for('budgets.delete', oid_str=b.oid) }}" method="POST" class="inline">
+                            <button type="submit" onclick="return confirm('¿Eliminar presupuesto?');" class="text-neutral-600 hover:text-error transition-colors">
+                                <span class="material-symbols-outlined text-sm">close</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Barra de progreso -->
+                <div class="w-full h-3 bg-white/5 rounded-full overflow-hidden">
+                    <div class="h-full rounded-full transition-all duration-500 {% if b.over %}bg-gradient-to-r from-error/80 to-error{% elif b.pct > 75 %}bg-gradient-to-r from-yellow-500/60 to-yellow-400{% else %}bg-gradient-to-r from-success/40 to-success/80{% endif %}"
+                         style="width: {{ b.pct }}%;"></div>
+                </div>
+                
+                {% if b.over %}
+                <p class="text-[10px] text-error mt-2 font-bold uppercase tracking-wider flex items-center gap-1">
+                    <span class="material-symbols-outlined text-xs">warning</span>
+                    Te has pasado en {{ "%.2f"|format(b.spent - b.limit) }}€
+                </p>
+                {% else %}
+                <p class="text-[10px] text-neutral-600 mt-2">Te quedan <span class="text-neutral-400 font-bold">{{ "%.2f"|format(b.remaining) }}€</span> disponibles</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-20">
+            <div class="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
+                <span class="material-symbols-outlined text-4xl text-neutral-700">monitoring</span>
+            </div>
+            <p class="text-neutral-500 font-jakarta">Crea tu primer presupuesto para empezar a controlar tus gastos.</p>
+        </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}
