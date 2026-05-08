@@ -1,0 +1,7 @@
+Flask==3.0.3
+Flask-Login==0.6.3
+redis==5.0.3
+sirope==0.3.1
+pylint==3.1.0
+gunicorn==21.2.0
+fakeredis==2.21.3
