@@ -1,0 +1,811 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+<!-- Page Header -->
+{% block page_header %}
+<h1 class="text-3xl font-bold font-jakarta text-white tracking-tight mb-1">Dashboard</h1>
+<p class="text-sm text-neutral-400">
+    {% if current_user.language == 'en' %}
+        Good afternoon, {{ current_user.email.split('@')[0] if current_user.is_authenticated else 'User' }}! 👋
+    {% else %}
+        ¡Buenas tardes, {{ current_user.email.split('@')[0] if current_user.is_authenticated else 'Usuario' }}! 👋
+    {% endif %}
+</p>
+{% endblock %}
+
+{% block content %}
+<!-- Dashboard Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-6">
+    
+    <!-- Left Column: Primary Wealth Indicators -->
+    <div class="lg:col-span-8 space-y-8">
+        
+        <!-- Balance Hero Card (Figma Design) -->
+        <section class="glass-card rounded-3xl p-6 md:p-8 relative overflow-hidden flex flex-col justify-between border border-white/5 animate-fade-up js-tilt" style="min-height: 400px; animation-delay: 0s;">
+            <!-- Fondo oscuro con gradiente muy sutil -->
+            <div class="absolute inset-0 bg-[#0A0A0A] pointer-events-none z-0"></div>
+            <div class="absolute inset-0 bg-gradient-to-b from-primary/10 via-transparent to-transparent pointer-events-none z-0"></div>
+            
+            <div class="relative z-10 flex justify-between items-start">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <p id="hero-patrimonio-label" class="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400 font-jakarta flex items-center gap-2 transition-all duration-200">
+                            <span class="w-1.5 h-1.5 rounded-full bg-success"></span> {{ 'NET WORTH' if current_user.language == 'en' else 'PATRIMONIO NETO' }}
+                        </p>
+                        
+                        <!-- Badge de porcentaje (Movido aquí) -->
+                        <div class="bg-success/10 px-2 py-0.5 rounded-full border border-success/20 flex items-center gap-1 shadow-[0_0_15px_rgba(181,242,176,0.1)] ml-4">
+                            <span class="material-symbols-outlined text-[12px] text-success">{% if pct_change >= 0 %}trending_up{% else %}trending_down{% endif %}</span>
+                            <span class="text-[10px] font-bold text-success font-outfit">
+                                {{ "%+.1f"|format(pct_change) }}%
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline gap-1">
+                        <h1 id="hero-balance-entero" class="text-5xl md:text-6xl font-bold font-outfit tracking-tight text-white transition-all duration-200">
+                            {{ saldo_total_entero }}
+                        </h1>
+                        <span id="hero-balance-decimal" class="text-2xl md:text-3xl font-bold font-outfit text-neutral-400 transition-all duration-200">
+                            .{{ saldo_total_decimal }} €
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Top Right: Period Selector -->
+                <div class="flex flex-col items-end">
+                    <div class="flex items-center gap-1 bg-white/5 p-1 rounded-xl border border-white/5">
+                        {% set periods = [('1D', '1D'), ('7D', '7D'), ('30D', '30D'), ('1Y', '1Y'), ('ALL', 'ALL')] %}
+                        {% for p_val, p_label in periods %}
+                        <a href="{{ url_for('dashboard.index', hero_period=p_val, month=curr_month, year=curr_year, view=request.args.get('view', 'week')) }}" 
+                           class="px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all {% if hero_period == p_val %}bg-white/10 text-primary shadow-sm{% else %}text-neutral-500 hover:text-white{% endif %}">
+                            {{ p_label }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Area Chart SVG -->
+            <div class="absolute left-0 right-0 top-1/2 -translate-y-1/2 w-full h-full z-0 opacity-90" style="margin-top: 40px;">
+                <!-- MAX/MIN Axis (Right Side) -->
+                <div class="absolute right-6 top-0 bottom-0 py-12 flex flex-col justify-between items-end pointer-events-none z-10">
+                    <div class="flex flex-col items-end">
+                        <span class="text-[9px] font-bold text-neutral-600 uppercase tracking-widest mb-1">{{ 'Maximum' if current_user.language == 'en' else 'Máximo' }}</span>
+                        <span class="text-neutral-400 text-[11px] font-outfit tabular-nums">{{ "{:,.2f}".format(c_max_real) }} €</span>
+                    </div>
+                    <div class="flex flex-col items-end">
+                        <span class="text-[9px] font-bold text-neutral-600 uppercase tracking-widest mb-1">{{ 'Minimum' if current_user.language == 'en' else 'Mínimo' }}</span>
+                        <span class="text-neutral-400 text-[11px] font-outfit tabular-nums">{{ "{:,.2f}".format(c_min_real) }} €</span>
+                    </div>
+                </div>
+                <svg viewBox="0 0 1000 300" class="w-full h-full" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="heroGradient" x1="0" x2="0" y1="0" y2="1">
+                            <stop offset="0%" stop-color="#a855f7" stop-opacity="0.35" />
+                            <stop offset="100%" stop-color="#a855f7" stop-opacity="0" />
+                        </linearGradient>
+                    </defs>
+                    <!-- Area Fill -->
+                    <path d="{{ hero_area_d }}" fill="url(#heroGradient)" class="hero-chart-anim-area"></path>
+                    <!-- Line Stroke -->
+                    <path d="{{ hero_path_d }}" fill="none" stroke="#a855f7" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="hero-chart-anim-line" style="filter: drop-shadow(0 -5px 15px rgba(168, 85, 247, 0.5)); pointer-events: none;"></path>
+                </svg>
+                
+                <!-- Interactive Overlay for Hover -->
+                <div id="hero-chart-overlay" class="absolute inset-0 z-20 cursor-crosshair group">
+                    <!-- Cursor Line -->
+                    <div id="hero-cursor-line" class="absolute top-0 bottom-0 w-[1px] bg-white/20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150"></div>
+                    <!-- Cursor Dot -->
+                    <div id="hero-cursor-dot" class="absolute w-3 h-3 rounded-full bg-white border-2 border-primary pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-150 -translate-x-1/2 -translate-y-1/2 shadow-[0_0_10px_rgba(255,255,255,0.8)]"></div>
+                </div>
+            </div>
+            
+            <!-- Bottom Section -->
+            <div class="relative z-10 mt-auto flex items-end">
+            </div>
+        </section>
+
+        <!-- Activity Chart: Semana / Mes / Año -->
+        <section class="glass-card rounded-3xl p-6 animate-fade-up js-tilt" style="animation-delay: 0.1s;">
+            <div class="flex justify-between items-center mb-8">
+                <h3 class="text-sm font-bold uppercase tracking-widest text-neutral-400 font-jakarta">{{ 'Financial Activity' if current_user.language == 'en' else 'Actividad Financiera' }}</h3>
+                <div class="flex gap-1 bg-transparent rounded-full border border-white/5 p-1">
+                    <button onclick="switchView('week')" id="btn-week" class="chart-tab px-3 py-1.5 rounded-lg text-xs font-bold transition-all {% if view == 'week' %}active{% endif %}">{{ 'Week' if current_user.language == 'en' else 'Semana' }}</button>
+                    <button onclick="switchView('month')" id="btn-month" class="chart-tab px-3 py-1.5 rounded-lg text-xs font-bold transition-all {% if view == 'month' %}active{% endif %}">{{ 'Month' if current_user.language == 'en' else 'Mes' }}</button>
+                    <button onclick="switchView('year')" id="btn-year" class="chart-tab px-3 py-1.5 rounded-lg text-xs font-bold transition-all {% if view == 'year' %}active{% endif %}">{{ 'Year' if current_user.language == 'en' else 'Año' }}</button>
+                </div>
+            </div>
+
+            <!-- ===== VISTA SEMANA: Barras Pro (Bidireccionales) ===== -->
+            <div id="view-week" class="chart-view {% if view != 'week' %}hidden{% endif %}">
+                <div class="flex h-80 relative mb-4">
+                    <!-- Y Axis -->
+                    <div class="flex flex-col justify-between text-right pr-4 text-[10px] text-neutral-500 py-2 border-r border-white/5 font-outfit w-12 shrink-0">
+                        <span>30 €</span>
+                        <span>20 €</span>
+                        <span>10 €</span>
+                        <span>0 €</span>
+                        <span>-10 €</span>
+                        <span>-20 €</span>
+                        <span>-30 €</span>
+                    </div>
+
+                    <!-- Chart Area -->
+                    <div class="flex-1 relative">
+                        <!-- Horizontal Grid Lines -->
+                        <div class="absolute inset-0 flex flex-col justify-between py-2 pl-4 pointer-events-none z-0">
+                            <div class="w-full h-[1px] bg-white/5"></div>
+                            <div class="w-full h-[1px] bg-white/5"></div>
+                            <div class="w-full h-[1px] bg-white/5"></div>
+                            <div class="w-full h-[1px] bg-white/10"></div> <!-- Zero Line -->
+                            <div class="w-full h-[1px] bg-white/5"></div>
+                            <div class="w-full h-[1px] bg-white/5"></div>
+                            <div class="w-full h-[1px] bg-white/5"></div>
+                        </div>
+
+                        <!-- Bars -->
+                        <div class="absolute inset-0 flex items-center justify-between z-10 py-2 pl-4 pr-2 chart-area-3d">
+                            {% for d in chart_week %}
+                            <div class="flex-1 h-full flex flex-col items-center relative group">
+                                <!-- Espacio Positivo -->
+                                <div class="flex-1 w-full flex items-end justify-center pb-2">
+                                    {% if d.net > 0 %}
+                                    <div class="chart-tooltip">{{ '%+.2f'|format(d.net) }} €</div>
+                                    <div class="bar-3d-container w-10 sm:w-12" style="animation-delay: {{ 0.2 + (loop.index0 * 0.08) }}s;">
+                                        <div class="bar-3d bg-success" style="--target-height: {{ (d.abs / week_max * 100)|int }}%;">
+                                            <div class="bar-3d-front bg-success"></div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Etiqueta sobre el eje -->
+                                <div class="h-6 flex items-center justify-center bg-transparent px-2 relative z-20">
+                                    <span class="text-[11px] text-neutral-400 font-semibold">{{ d.label }}</span>
+                                </div>
+                                
+                                <!-- Espacio Negativo -->
+                                <div class="flex-1 w-full flex items-start justify-center pt-2">
+                                    {% if d.net < 0 %}
+                                    <div class="chart-tooltip tooltip-below">{{ '%+.2f'|format(d.net) }} €</div>
+                                    <div class="bar-3d-container w-10 sm:w-12" style="animation-delay: {{ 0.2 + (loop.index0 * 0.08) }}s;">
+                                        <div class="bar-3d bg-error" style="--target-height: {{ (d.abs / week_max * 100)|int }}%;">
+                                            <div class="bar-3d-front bg-error"></div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== VISTA MES: Cuadrícula GitHub ===== -->
+            <div id="view-month" class="chart-view {% if view != 'month' %}hidden{% endif %}">
+                <div class="flex items-center justify-center gap-4 mb-6">
+                    <a href="{{ url_for('dashboard.index', month=prev_month, year=prev_year_m, view='month') }}" class="p-1 hover:bg-white/10 rounded-full transition-colors text-neutral-400 hover:text-white">
+                        <span class="material-symbols-outlined text-sm">chevron_left</span>
+                    </a>
+                    <p class="text-[10px] text-neutral-200 font-bold uppercase tracking-widest">{{ mes_label }}</p>
+                    <a href="{{ url_for('dashboard.index', month=next_month, year=next_year_m, view='month') }}" class="p-1 hover:bg-white/10 rounded-full transition-colors text-neutral-400 hover:text-white">
+                        <span class="material-symbols-outlined text-sm">chevron_right</span>
+                    </a>
+                </div>
+                
+                <div class="w-full">
+                    <!-- Cabecera días de la semana -->
+                    <div class="grid grid-cols-7 gap-3 mb-3">
+                        {% set day_names = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'] if current_user.language == 'en' else ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'] %}
+                        {% for day_name in day_names %}
+                        <div class="text-center text-[10px] font-bold text-neutral-500 uppercase tracking-widest">{{ day_name }}</div>
+                        {% endfor %}
+                    </div>
+                    <!-- Cuadrícula de días -->
+                    <div class="grid grid-cols-7 gap-3">
+                        <!-- Padding para alinear al día correcto -->
+                        {% for _ in range(pad_inicio) %}
+                        <div></div>
+                        {% endfor %}
+                        {% for d in chart_month %}
+                        <div class="h-12 rounded-xl flex items-center justify-center text-sm font-bold cursor-default transition-all hover:ring-2 hover:ring-primary/40 relative group
+                            {% if d.future %}bg-white/[0.03] text-neutral-700
+                            {% elif d.net > 0 %}bg-success/20 text-success border-2 border-success/20
+                            {% elif d.net < 0 %}bg-error/20 text-error border-2 border-error/20
+                            {% else %}bg-white/5 text-neutral-600 border-2 border-white/5
+                            {% endif %}">
+                            <div class="chart-tooltip">{{ '%+.2f'|format(d.net) }} €</div>
+                            {{ d.day }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Leyenda -->
+                <div class="flex items-center justify-center gap-8 mt-6">
+                    <div class="flex items-center gap-2.5"><div class="w-3.5 h-3.5 rounded-md bg-success/25 border border-success/20"></div><span class="text-[11px] text-neutral-500 font-semibold">{{ 'Gain' if current_user.language == 'en' else 'Ganancia' }}</span></div>
+                    <div class="flex items-center gap-2.5"><div class="w-3.5 h-3.5 rounded-md bg-error/25 border border-error/20"></div><span class="text-[11px] text-neutral-500 font-semibold">{{ 'Loss' if current_user.language == 'en' else 'Pérdida' }}</span></div>
+                    <div class="flex items-center gap-2.5"><div class="w-3.5 h-3.5 rounded-md bg-white/5 border border-white/5"></div><span class="text-[11px] text-neutral-500 font-semibold">{{ 'No activity' if current_user.language == 'en' else 'Sin actividad' }}</span></div>
+                </div>
+            </div>
+
+            <!-- ===== VISTA AÑO: Barras mensuales Pro ===== -->
+            <div id="view-year" class="chart-view {% if view != 'year' %}hidden{% endif %}">
+                <div class="flex items-center justify-center gap-4 mb-6">
+                    <a href="{{ url_for('dashboard.index', month=curr_month, year=prev_year, view='year') }}" class="p-1 hover:bg-white/10 rounded-full transition-colors text-neutral-400 hover:text-white">
+                        <span class="material-symbols-outlined text-sm">chevron_left</span>
+                    </a>
+                    <p class="text-[10px] text-neutral-200 font-bold uppercase tracking-widest">{{ year_label }}</p>
+                    <a href="{{ url_for('dashboard.index', month=curr_month, year=next_year, view='year') }}" class="p-1 hover:bg-white/10 rounded-full transition-colors text-neutral-400 hover:text-white">
+                        <span class="material-symbols-outlined text-sm">chevron_right</span>
+                    </a>
+                </div>
+                <div class="h-80 relative flex items-center justify-between gap-2 px-1">
+                    <!-- Eje Cero Sutil -->
+                    <div class="absolute left-0 right-0 h-[1px] bg-white/10 z-0"></div>
+
+                    {% for d in chart_year %}
+                    <div class="flex-1 h-full flex flex-col items-center z-10">
+                        <!-- Ganancias -->
+                        <div class="flex-1 w-full flex items-end relative group">
+                            {% if not d.future and d.net > 0 %}
+                            <div class="chart-tooltip">{{ '%+.2f'|format(d.net) }} €</div>
+                            <div class="w-full bg-gradient-to-t from-success/40 to-success/10 border-x border-t border-success/30 rounded-t-md transition-all hover:from-success/50 grow-bar-up"
+                                 style="--target-height: {{ (d.abs / year_max * 100)|int }}%;"></div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Etiqueta -->
+                        <div class="h-8 flex items-center">
+                            <span class="text-[9px] text-neutral-500 font-bold uppercase">{{ d.label }}</span>
+                        </div>
+
+                        <!-- Pérdidas -->
+                        <div class="flex-1 w-full flex items-start relative group">
+                            {% if not d.future and d.net < 0 %}
+                            <div class="chart-tooltip tooltip-below">{{ '%+.2f'|format(d.net) }} €</div>
+                            <div class="w-full bg-gradient-to-b from-error/40 to-error/10 border-x border-b border-error/30 rounded-b-md transition-all hover:from-error/50 grow-bar-up"
+                                 style="--target-height: {{ (d.abs / year_max * 100)|int }}%;"></div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- ===== VISTA PATRIMONIO: Gráfico Histórico Limpio ===== -->
+            <div id="view-wealth" class="chart-view hidden">
+                <p class="text-[10px] text-neutral-500 font-bold uppercase tracking-widest mb-8 text-center">{{ 'Historical Wealth Evolution' if current_user.language == 'en' else 'Evolución Histórica de Patrimonio' }}</p>
+
+                <!-- Gráfico de Barras Infográfico -->
+                <div class="h-64 relative flex items-end justify-between gap-1 sm:gap-2 px-1 border-b border-white/10 mb-6">
+                    <!-- Guías de fondo sutiles -->
+                    <div class="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-10">
+                        <div class="w-full h-[1px] bg-white"></div>
+                        <div class="w-full h-[1px] bg-white"></div>
+                        <div class="w-full h-[1px] bg-white"></div>
+                    </div>
+
+                    {% for d in chart_patrimonio %}
+                    <div class="flex-1 flex flex-col items-center z-10 group h-full justify-end relative">
+                        {% if not d.es_futuro and d.net > 0 %}
+                            <div class="chart-tooltip">{{ "%.0f"|format(d.net) }}€</div>
+                            <!-- Barra Verde Estilo App -->
+                            <div class="w-full bg-gradient-to-t from-success/40 to-success/20 border-x border-t border-success/30 rounded-t-sm transition-all hover:from-success/60 grow-bar-up"
+                                 style="--target-height: {{ (d.abs / wealth_max * 85)|int }}%;"></div>
+                        {% elif d.es_futuro %}
+                            <!-- Barra vacía para años futuros -->
+                            <div class="w-full bg-white/5 border-x border-t border-dashed border-white/10 rounded-t-sm" style="height: 5%;"></div>
+                        {% endif %}
+                        
+                        <!-- Año -->
+                        <span class="text-[9px] text-neutral-500 font-bold mt-2">{{ d.label }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Financial Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-12 pt-8 border-t border-white/5">
+                <!-- Ingresos -->
+                <div class="bg-white/5 border border-white/5 rounded-2xl p-5 hover:bg-white/10 transition-colors">
+                    <p class="text-[10px] font-bold text-success tracking-widest mb-2">{{ 'INCOME' if current_user.language == 'en' else 'INGRESOS' }}</p>
+                    <div class="flex justify-between items-center mb-1">
+                        <h4 class="text-xl font-bold font-outfit text-white">+10.00 €</h4>
+                        <span class="material-symbols-outlined text-success">trending_up</span>
+                    </div>
+                    <p class="text-[10px] text-neutral-500"><span class="text-success font-semibold">+100%</span> {{ 'vs last week' if current_user.language == 'en' else 'vs semana pasada' }}</p>
+                </div>
+                <!-- Gastos -->
+                <div class="bg-white/5 border border-white/5 rounded-2xl p-5 hover:bg-white/10 transition-colors">
+                    <p class="text-[10px] font-bold text-error tracking-widest mb-2">{{ 'EXPENSES' if current_user.language == 'en' else 'GASTOS' }}</p>
+                    <div class="flex justify-between items-center mb-1">
+                        <h4 class="text-xl font-bold font-outfit text-white">-0.00 €</h4>
+                        <span class="material-symbols-outlined text-error">trending_down</span>
+                    </div>
+                    <p class="text-[10px] text-neutral-500"><span class="text-error font-semibold">+0%</span> {{ 'vs last week' if current_user.language == 'en' else 'vs semana pasada' }}</p>
+                </div>
+                <!-- Ahorros -->
+                <div class="bg-white/5 border border-white/5 rounded-2xl p-5 hover:bg-white/10 transition-colors">
+                    <p class="text-[10px] font-bold text-primary tracking-widest mb-2">{{ 'SAVINGS' if current_user.language == 'en' else 'AHORROS' }}</p>
+                    <div class="flex justify-between items-center mb-1">
+                        <h4 class="text-xl font-bold font-outfit text-white">+10.00 €</h4>
+                        <span class="material-symbols-outlined text-primary">trending_up</span>
+                    </div>
+                    <p class="text-[10px] text-neutral-500"><span class="text-success font-semibold">+100%</span> {{ 'vs last week' if current_user.language == 'en' else 'vs semana pasada' }}</p>
+                </div>
+            </div>
+
+        </section>
+
+        <script>
+        function switchView(view) {
+            document.querySelectorAll('.chart-view').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.chart-tab').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-' + view).classList.remove('hidden');
+            document.getElementById('btn-' + view).classList.add('active');
+            
+            // Guardar vista en URL para que al navegar por meses no se resetee a "semana"
+            const url = new URL(window.location);
+            url.searchParams.set('view', view);
+            window.history.replaceState({}, '', url);
+        }
+
+        // Recuperar vista de la URL al cargar
+        window.onload = function() {
+            const params = new URLSearchParams(window.location.search);
+            const view = params.get('view') || 'week';
+            switchView(view);
+        };
+        </script>
+        <style>
+            .chart-tab { color: rgba(255,255,255,0.4); }
+            .chart-tab:hover { color: #fff; background: rgba(255,255,255,0.05); }
+            .chart-tab.active { background: rgba(202,152,255,0.15); color: #ca98ff; border: 1px solid rgba(202,152,255,0.25); }
+            
+            /* Animación para los gráficos de donut */
+            .donut-segment {
+                stroke-dasharray: 0 var(--c);
+                stroke-dashoffset: var(--offset);
+                animation: drawDonut 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+                opacity: 0;
+            }
+            @keyframes drawDonut {
+                0% { stroke-dasharray: 0 var(--c); opacity: 1; }
+                100% { stroke-dasharray: var(--dash) var(--c); opacity: 1; }
+            }
+            
+            /* Animación para el Hero Chart SVG */
+            .hero-chart-anim-line {
+                stroke-dasharray: 2000;
+                stroke-dashoffset: 2000;
+                animation: drawHeroLine 1.5s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
+            }
+            .hero-chart-anim-area {
+                opacity: 0;
+                animation: fadeHeroArea 1.5s ease-out forwards;
+                animation-delay: 0.5s;
+            }
+            @keyframes drawHeroLine {
+                to { stroke-dashoffset: 0; }
+            }
+            @keyframes fadeHeroArea {
+                to { opacity: 1; }
+            }
+            
+            /* Staggered Fade Up Cards */
+            .animate-fade-up {
+                opacity: 0;
+                transform: translateY(30px);
+                animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            }
+            @keyframes fadeUp {
+                to { opacity: 1; transform: translateY(0); }
+            }
+
+            /* 3D Column Effect */
+            .chart-area-3d {
+                perspective: 1000px;
+                transform-style: preserve-3d;
+            }
+
+            .bar-3d-container {
+                position: relative;
+                transform-style: preserve-3d;
+                transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            }
+
+            .bar-3d {
+                position: relative;
+                transform-style: preserve-3d;
+                height: 0;
+                animation: growBar3D 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            }
+
+            /* Front Face */
+            .bar-3d-front {
+                position: absolute;
+                inset: 0;
+                background: inherit;
+                backface-visibility: hidden;
+                z-index: 2;
+                border-radius: 4px 4px 0 0;
+            }
+
+            /* Top Face */
+            .bar-3d::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 20px;
+                background: rgba(255, 255, 255, 0.2);
+                transform: rotateX(90deg) translateZ(10px);
+                filter: brightness(1.2);
+                border-radius: 2px;
+            }
+
+            /* Right Face */
+            .bar-3d::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                right: 0;
+                width: 20px;
+                height: 100%;
+                background: inherit;
+                transform: rotateY(90deg) translateZ(-10px);
+                filter: brightness(0.7);
+                border-radius: 0 2px 2px 0;
+            }
+
+            .bar-3d-container:hover {
+                transform: rotateY(-25deg) rotateX(10deg) translateZ(10px);
+                z-index: 50;
+            }
+
+            .bar-3d-container:hover .bar-3d-front {
+                filter: brightness(1.1);
+                box-shadow: -10px 10px 30px rgba(0,0,0,0.5);
+            }
+
+            @keyframes growBar3D {
+                0% { height: 0; transform: translateZ(-20px); opacity: 0; }
+                100% { height: var(--target-height); transform: translateZ(0); opacity: 1; }
+            }
+
+            /* Growing Bars */
+            .grow-bar-up {
+                height: 0;
+                animation: growBar 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                animation-delay: 0.2s;
+            }
+            @keyframes growBar {
+                to { height: var(--target-height); }
+            }
+
+            /* Perspective for Tilt */
+            .js-tilt {
+                transform-style: preserve-3d;
+                perspective: 1200px;
+                transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, border-color 0.2s ease-out;
+            }
+
+            /* Slide In for Transactions */
+            .animate-slide-in {
+                opacity: 0;
+                transform: translateX(-20px);
+                animation: slideInRow 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            }
+            @keyframes slideInRow {
+                to { opacity: 1; transform: translateX(0); }
+            }
+
+            /* Custom Tooltip Styles */
+            .chart-tooltip {
+                position: absolute;
+                bottom: calc(100% + 8px);
+                left: 50%;
+                transform: translateX(-50%) translateY(10px);
+                background: #1a1a1a;
+                color: white;
+                padding: 6px 10px;
+                border-radius: 8px;
+                font-size: 10px;
+                font-weight: bold;
+                white-space: nowrap;
+                opacity: 0;
+                pointer-events: none;
+                transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                border: 1px solid rgba(255,255,255,0.1);
+                box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+                z-index: 100;
+            }
+            .group:hover .chart-tooltip {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+            /* Tooltip below for negative bars */
+            .tooltip-below {
+                bottom: auto;
+                top: calc(100% + 8px);
+                transform: translateX(-50%) translateY(-10px);
+            }
+            .group:hover .tooltip-below {
+                transform: translateX(-50%) translateY(0);
+            }
+        </style>
+        
+        <script>
+            // Lógica para el hover interactivo del Hero Chart
+            document.addEventListener('DOMContentLoaded', () => {
+                const userLocale = "{{ 'en-US' if current_user.language == 'en' else 'es-ES' }}";
+                const chartPoints = {{ hero_chart_points | safe }};
+                const svgOverlay = document.getElementById('hero-chart-overlay');
+                const cursorLine = document.getElementById('hero-cursor-line');
+                const cursorDot = document.getElementById('hero-cursor-dot');
+                
+                const heroBalanceEntero = document.getElementById('hero-balance-entero');
+                const heroBalanceDecimal = document.getElementById('hero-balance-decimal');
+                const heroPatrimonioLabel = document.getElementById('hero-patrimonio-label');
+                
+                if (svgOverlay && chartPoints && chartPoints.length > 0) {
+                    const originalEntero = heroBalanceEntero.innerText.trim();
+                    const originalDecimal = heroBalanceDecimal.innerText.trim();
+                    const originalLabelHTML = heroPatrimonioLabel.innerHTML;
+                    
+                    svgOverlay.addEventListener('mousemove', (e) => {
+                        const rect = svgOverlay.getBoundingClientRect();
+                        const xPercent = (e.clientX - rect.left) / rect.width;
+                        const xSvg = xPercent * 1000;
+                        
+                        let closestPoint = chartPoints[0];
+                        let minDiff = Math.abs(chartPoints[0].x - xSvg);
+                        
+                        for (let i = 1; i < chartPoints.length; i++) {
+                            const diff = Math.abs(chartPoints[i].x - xSvg);
+                            if (diff < minDiff) {
+                                minDiff = diff;
+                                closestPoint = chartPoints[i];
+                            }
+                        }
+                        
+                        const pointXPercent = (closestPoint.x / 1000) * 100;
+                        const pointYPercent = (closestPoint.y / 300) * 100;
+                        
+                        cursorLine.style.left = `${pointXPercent}%`;
+                        cursorDot.style.left = `${pointXPercent}%`;
+                        cursorDot.style.top = `${pointYPercent}%`;
+                        
+                        const valStr = closestPoint.val.toLocaleString(userLocale, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                        const decimalSeparator = userLocale === 'en-US' ? '.' : ',';
+                        const parts = valStr.split(decimalSeparator);
+                        
+                        heroBalanceEntero.innerText = parts[0];
+                        heroBalanceDecimal.innerText = `.${parts[1] || '00'} €`;
+                        
+                        const dateObj = new Date(closestPoint.date);
+                        const dateOptions = { day: 'numeric', month: 'short', year: 'numeric' };
+                        heroPatrimonioLabel.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-white/50"></span> ${dateObj.toLocaleDateString(userLocale, dateOptions)}`;
+                    });
+                    
+                    svgOverlay.addEventListener('mouseleave', () => {
+                        heroBalanceEntero.innerText = originalEntero;
+                        heroBalanceDecimal.innerText = originalDecimal;
+                        heroPatrimonioLabel.innerHTML = originalLabelHTML;
+                    });
+                }
+
+                // Efecto Tilt para las tarjetas
+                const tiltElements = document.querySelectorAll('.js-tilt');
+                tiltElements.forEach(el => {
+                    el.addEventListener('mousemove', (e) => {
+                        const rect = el.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+                        
+                        const centerX = rect.width / 2;
+                        const centerY = rect.height / 2;
+                        
+                        const rotateX = ((y - centerY) / centerY) * -5; // Max 5 degrees
+                        const rotateY = ((x - centerX) / centerX) * 5;  // Max 5 degrees
+                        
+                        el.style.transform = `perspective(1000px) translateY(-4px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+                    });
+                    
+                    el.addEventListener('mouseleave', () => {
+                        el.style.transform = `perspective(1000px) translateY(0) rotateX(0) rotateY(0) scale(1)`;
+                    });
+                });
+            });
+
+            // Lógica para los Donut Charts Interactivos
+            function updateDonut(id, label, value, pct) {
+                const labelEl = document.getElementById('donut-label-' + id);
+                const valueEl = document.getElementById('donut-value-' + id);
+                if (labelEl && valueEl) {
+                    labelEl.innerText = label;
+                    valueEl.innerText = value + ' (' + pct + ')';
+                    labelEl.style.color = '#ca98ff'; // Color primario al hacer hover
+                }
+            }
+
+            function resetDonut(id, label, value) {
+                const labelEl = document.getElementById('donut-label-' + id);
+                const valueEl = document.getElementById('donut-value-' + id);
+                if (labelEl && valueEl) {
+                    labelEl.innerText = label;
+                    valueEl.innerText = value;
+                    labelEl.style.color = ''; // Reset color
+                }
+            }
+        </script>
+    </div>
+
+    <!-- Right Column: Transactions & Quick Actions -->
+    <div class="lg:col-span-4 space-y-8">
+        
+        <!-- Distribución de Gastos e Ingresos -->
+        <section class="glass-card rounded-3xl p-6 animate-fade-up" style="animation-delay: 0.3s;">
+            <h3 class="text-sm font-bold uppercase tracking-widest text-neutral-400 mb-6 font-jakarta">{{ 'FINANCIAL DISTRIBUTION' if current_user.language == 'en' else 'Distribución Financiera' }}</h3>
+            
+            <div class="space-y-8">
+                <!-- Gastos Pie Chart -->
+                <div>
+                    <h4 class="text-[10px] font-bold uppercase text-error/80 tracking-widest mb-4 flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-error"></span> {{ 'Expenses by Category' if current_user.language == 'en' else 'Gastos por Categoría' }}
+                    </h4>
+                    {% if donut_gastos %}
+                    <div class="flex flex-col items-center gap-6">
+                        <div class="relative w-36 h-36">
+                            {% set ns_g = namespace(offset=0) %}
+                            {% set circ = 251.327 %}
+                            {% set gap = 3 if donut_gastos|length > 1 else 0 %}
+                            
+                            <!-- Central Label -->
+                            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10">
+                                <span id="donut-label-g" class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest transition-colors duration-300">Total</span>
+                                <span id="donut-value-g" class="text-xs font-bold text-white font-outfit">{{ "%.0f"|format(total_g) }} €</span>
+                            </div>
+
+                            <svg viewBox="0 0 100 100" class="w-full h-full transform -rotate-90 drop-shadow-[0_0_15px_rgba(255,82,82,0.15)]">
+                                {% for d in donut_gastos %}
+                                    {% set dash_length = (d.pct / 100) * circ %}
+                                    {% set actual_dash = dash_length - gap %}
+                                    {% if actual_dash < 0 %}{% set actual_dash = 0 %}{% endif %}
+                                    {% set dash_offset = -ns_g.offset %}
+                                    <circle cx="50" cy="50" r="40"
+                                            fill="none"
+                                            stroke="{{ d.color }}"
+                                            stroke-width="16"
+                                            class="donut-segment cursor-pointer transition-all duration-300 hover:stroke-width-[20px]"
+                                            style="--dash: {{ actual_dash }}; --c: {{ circ }}; --offset: {{ dash_offset }}; animation-delay: {{ loop.index0 * 0.15 }}s;"
+                                            stroke-dasharray="0 {{ circ }}"
+                                            stroke-dashoffset="{{ dash_offset }}"
+                                            onmouseenter="updateDonut('g', '{{ d.name }}', '{{ d.amount|int }} €', '{{ d.pct }}%')"
+                                            onmouseleave="resetDonut('g', 'Total', '{{ total_g|int }} €')"
+                                    ></circle>
+                                    {% set ns_g.offset = ns_g.offset + dash_length %}
+                                {% endfor %}
+                            </svg>
+                        </div>
+                        <div class="w-full space-y-2">
+                            {% for d in donut_gastos %}
+                            <div class="flex items-center justify-between text-[11px]">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-4 h-4 rounded-full flex items-center justify-center shrink-0" style="background-color: {{ d.color }}30;">
+                                        <span class="material-symbols-outlined text-[10px] leading-none" style="color: {{ d.color }};">{{ d.icon }}</span>
+                                    </div>
+                                    <span class="text-neutral-400 font-jakarta">{{ d.name }}</span>
+                                </div>
+                                <span class="font-bold text-white font-outfit">{{ "%.0f"|format(d.amount) }} € ({{ d.pct }}%)</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="text-[11px] text-neutral-600 italic text-center py-4">{{ 'No expenses recorded.' if current_user.language == 'en' else 'No hay gastos registrados.' }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Ingresos Pie Chart -->
+                <div class="pt-4 border-t border-white/5">
+                    <h4 class="text-[10px] font-bold uppercase text-success/80 tracking-widest mb-4 flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-success"></span> {{ 'Income by Category' if current_user.language == 'en' else 'Ingresos por Categoría' }}
+                    </h4>
+                    {% if donut_ingresos %}
+                    <div class="flex flex-col items-center gap-6">
+                        <div class="relative w-36 h-36">
+                            {% set ns_i = namespace(offset=0) %}
+                            {% set circ = 251.327 %}
+                            {% set gap = 3 if donut_ingresos|length > 1 else 0 %}
+
+                            <!-- Central Label -->
+                            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10">
+                                <span id="donut-label-i" class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest transition-colors duration-300">Total</span>
+                                <span id="donut-value-i" class="text-xs font-bold text-white font-outfit">{{ "%.0f"|format(total_i) }} €</span>
+                            </div>
+
+                            <svg viewBox="0 0 100 100" class="w-full h-full transform -rotate-90 drop-shadow-[0_0_15px_rgba(105,240,174,0.15)]">
+                                {% for d in donut_ingresos %}
+                                    {% set dash_length = (d.pct / 100) * circ %}
+                                    {% set actual_dash = dash_length - gap %}
+                                    {% if actual_dash < 0 %}{% set actual_dash = 0 %}{% endif %}
+                                    {% set dash_offset = -ns_i.offset %}
+                                    <circle cx="50" cy="50" r="40"
+                                            fill="none"
+                                            stroke="{{ d.color }}"
+                                            stroke-width="16"
+                                            class="donut-segment cursor-pointer transition-all duration-300 hover:stroke-width-[20px]"
+                                            style="--dash: {{ actual_dash }}; --c: {{ circ }}; --offset: {{ dash_offset }}; animation-delay: {{ loop.index0 * 0.15 }}s;"
+                                            stroke-dasharray="0 {{ circ }}"
+                                            stroke-dashoffset="{{ dash_offset }}"
+                                            onmouseenter="updateDonut('i', '{{ d.name }}', '{{ d.amount|int }} €', '{{ d.pct }}%')"
+                                            onmouseleave="resetDonut('i', 'Total', '{{ total_i|int }} €')"
+                                    ></circle>
+                                    {% set ns_i.offset = ns_i.offset + dash_length %}
+                                {% endfor %}
+                            </svg>
+                        </div>
+                        <div class="w-full space-y-2">
+                            {% for d in donut_ingresos %}
+                            <div class="flex items-center justify-between text-[11px]">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-4 h-4 rounded-full flex items-center justify-center shrink-0" style="background-color: {{ d.color }}30;">
+                                        <span class="material-symbols-outlined text-[10px] leading-none" style="color: {{ d.color }};">{{ d.icon }}</span>
+                                    </div>
+                                    <span class="text-neutral-400 font-jakarta">{{ d.name }}</span>
+                                </div>
+                                <span class="font-bold text-white font-outfit">{{ "%.0f"|format(d.amount) }} € ({{ d.pct }}%)</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="text-[11px] text-neutral-600 italic text-center py-4">{{ 'No income recorded.' if current_user.language == 'en' else 'No hay ingresos registrados.' }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <!-- Recent Transactions -->
+        <section class="glass-card rounded-3xl p-6 animate-fade-up" style="animation-delay: 0.4s;">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-sm font-bold uppercase tracking-widest text-neutral-400 font-jakarta">{{ 'Recent Activity' if current_user.language == 'en' else 'Actividad Reciente' }}</h3>
+                <a class="text-xs font-semibold text-primary hover:underline" href="{{ url_for('transactions.index') }}">{{ 'See All' if current_user.language == 'en' else 'Ver Todo' }}</a>
+            </div>
+            
+            <div class="space-y-6">
+                {% if transacciones %}
+                    {% for t in transacciones %}
+                    <div class="searchable-item flex items-center justify-between group cursor-pointer animate-slide-in transition-all duration-300" 
+                         data-search="{{ t.notes or '' }} {{ t.date_str }}"
+                         style="animation-delay: {{ 0.4 + (loop.index0 * 0.05) }}s;">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 {% if t.amount > 0 %}bg-success/20{% else %}bg-error/20{% endif %} transition-transform group-hover:scale-110">
+                                <span class="material-symbols-outlined text-[18px] {% if t.amount > 0 %}text-success{% else %}text-error{% endif %}">
+                                    {% if t.amount > 0 %}arrow_downward{% else %}shopping_cart{% endif %}
+                                </span>
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-white font-jakarta">{{ t.notes or ('No description' if current_user.language == 'en' else 'Sin descripción') }}</p>
+                                <p class="text-[10px] text-neutral-500 font-jakarta">{{ t.date_str }}</p>
+                            </div>
+                        </div>
+                        <span class="text-sm font-bold font-outfit {% if t.amount > 0 %}text-success{% else %}text-error{% endif %}">
+                            {% if t.amount > 0 %}+{% endif %}{{ "%.2f"|format(t.amount) }} €
+                        </span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-sm text-neutral-500 italic">{{ 'No recent transactions.' if current_user.language == 'en' else 'No hay transacciones recientes.' }}</p>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+</div>
+
+{% endblock %}
+ 

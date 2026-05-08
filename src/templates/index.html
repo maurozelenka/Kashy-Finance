@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Sirope - Mensajes</title>
+</head>
+<body>
+    <h1>Mensajes Guardados (Últimos 10)</h1>
+    <ul>
+        {% for msg in messages_list %}
+            <li>{{ msg.message_txt }}</li>
+        {% else %}
+            <li>Aún no hay mensajes. ¡Escribe algo!</li>
+        {% endfor %}
+    </ul>
+    <hr>
+    <form action="/save_message" method="POST">
+        <label for="edMessage">Nuevo Mensaje:</label>
+        <input type="text" id="edMessage" name="edMessage" placeholder="Escribe aquí tu mensaje...">
+        <button type="submit">Guardar en Redis</button>
+    </form>
+</body>
+</html>
