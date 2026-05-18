@@ -55,3 +55,24 @@ def delete(oid):
         flask.flash(f"Error al eliminar: {e}", "error")
         
     return flask.redirect(flask.url_for("accounts.index"))
+
+@accounts_bp.route("/edit/<oid>", methods=["POST"])
+@login_required
+def edit(oid):
+    """Edición de cuenta."""
+    srp = flask.current_app.config['sirope']
+    try:
+        acc = srp.load(OID(oid))
+        if acc and acc.user_oid == current_user.get_id():
+            name = flask.request.form.get("name")
+            initial_balance = flask.request.form.get("initial_balance")
+            if name and initial_balance is not None:
+                acc.name = name
+                acc.initial_balance = float(initial_balance)
+                srp.save(acc)
+                flask.flash(f"Cuenta '{name}' actualizada con éxito.", "success")
+        else:
+            flask.flash("No tienes permisos para editar esta cuenta.", "error")
+    except Exception as e:
+        flask.flash(f"Error al editar: {e}", "error")
+    return flask.redirect(flask.url_for("accounts.index"))

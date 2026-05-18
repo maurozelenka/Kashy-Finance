@@ -105,3 +105,23 @@ def delete(oid_str):
     except Exception as e:
         flask.flash(f"Error: {e}", "error")
     return flask.redirect(flask.url_for("budgets.index"))
+
+@budgets_bp.route("/edit/<oid_str>", methods=["POST"])
+@login_required
+def edit(oid_str):
+    """Edición de presupuesto."""
+    srp = flask.current_app.config['sirope']
+    try:
+        oid = OID.from_text(oid_str)
+        b = srp.load(oid)
+        if b and b.user_oid == current_user.get_id():
+            limit_amount = flask.request.form.get("limit_amount")
+            if limit_amount:
+                b.limit_amount = float(limit_amount)
+                srp.save(b)
+                flask.flash("Presupuesto modificado con éxito.", "success")
+        else:
+            flask.flash("No tienes permiso.", "error")
+    except Exception as e:
+        flask.flash(f"Error al modificar: {e}", "error")
+    return flask.redirect(flask.url_for("budgets.index"))

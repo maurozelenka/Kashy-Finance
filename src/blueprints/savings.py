@@ -91,3 +91,35 @@ def delete(oid_str):
     except Exception as e:
         flask.flash(f"Error: {e}", "error")
     return flask.redirect(flask.url_for("savings.index"))
+
+@savings_bp.route("/edit/<oid_str>", methods=["POST"])
+@login_required
+def edit(oid_str):
+    """Edición de meta de ahorro."""
+    srp = flask.current_app.config['sirope']
+    try:
+        oid = OID.from_text(oid_str)
+        g = srp.load(oid)
+        if g and g.user_oid == current_user.get_id():
+            name = flask.request.form.get("name")
+            target = flask.request.form.get("target_amount")
+            current_amt = flask.request.form.get("current_amount")
+            icon = flask.request.form.get("icon")
+            color = flask.request.form.get("color")
+            
+            if name and target:
+                g.name = name
+                g.target_amount = float(target)
+                if current_amt is not None:
+                    g.current_amount = float(current_amt)
+                if icon:
+                    g.icon = icon
+                if color:
+                    g.color = color
+                srp.save(g)
+                flask.flash("Meta de ahorro modificada con éxito.", "success")
+        else:
+            flask.flash("No tienes permiso.", "error")
+    except Exception as e:
+        flask.flash(f"Error al modificar: {e}", "error")
+    return flask.redirect(flask.url_for("savings.index"))

@@ -92,3 +92,39 @@ def delete(oid_str):
         flask.flash(f"Error al eliminar la transacción: {e}", "error")
         
     return flask.redirect(flask.url_for("transactions.index"))
+
+@transactions_bp.route("/edit/<oid_str>", methods=["POST"])
+@login_required
+def edit(oid_str):
+    """Edición de transacción."""
+    srp = flask.current_app.config['sirope']
+    try:
+        oid = OID.from_text(oid_str)
+        t = srp.load(oid)
+        if t and t.user_oid == current_user.get_id():
+            amount = flask.request.form.get("amount")
+            notes = flask.request.form.get("notes")
+            date_str = flask.request.form.get("date_str")
+            cat_oid = flask.request.form.get("cat_oid")
+            acc_oid = flask.request.form.get("acc_oid")
+            
+            if amount and cat_oid and acc_oid:
+                cat = srp.load(OID.from_text(cat_oid))
+                amount_val = float(amount)
+                if cat.cat_type == 'gasto' and amount_val > 0:
+                    amount_val = -amount_val
+                elif cat.cat_type == 'ingreso' and amount_val < 0:
+                    amount_val = abs(amount_val)
+                    
+                t.amount = amount_val
+                t.notes = notes
+                t.date_str = date_str
+                t.cat_oid = cat_oid
+                t.acc_oid = acc_oid
+                srp.save(t)
+                flask.flash("Transacción modificada con éxito.", "success")
+        else:
+            flask.flash("No tienes permisos para editar esta transacción.", "error")
+    except Exception as e:
+        flask.flash(f"Error al modificar: {e}", "error")
+    return flask.redirect(flask.url_for("transactions.index"))

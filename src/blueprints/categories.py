@@ -52,3 +52,29 @@ def delete(oid):
         flask.flash("Error al eliminar categoría.", "error")
         
     return flask.redirect(flask.url_for("categories.index"))
+
+@categories_bp.route("/edit/<oid>", methods=["POST"])
+@login_required
+def edit(oid):
+    """Edición de categoría."""
+    srp = flask.current_app.config['sirope']
+    try:
+        cat = srp.load(OID(oid))
+        if cat and cat.user_oid == current_user.get_id():
+            name = flask.request.form.get("name")
+            color = flask.request.form.get("color")
+            icon = flask.request.form.get("icon")
+            
+            if name:
+                cat.name = name
+                if color:
+                    cat.color = color
+                if icon:
+                    cat.icon = icon
+                srp.save(cat)
+                flask.flash(f"Categoría '{name}' modificada.", "success")
+        else:
+            flask.flash("No tienes permiso.", "error")
+    except Exception as e:
+        flask.flash(f"Error al modificar: {e}", "error")
+    return flask.redirect(flask.url_for("categories.index"))
