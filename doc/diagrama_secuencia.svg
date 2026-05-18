@@ -1,0 +1,135 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 700" width="100%" height="100%">
+  <!-- Definitions for Arrowheads -->
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#000000"/>
+    </marker>
+    <marker id="dashed-arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="none" stroke="#000000" stroke-width="1"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1100" height="700" fill="#ffffff"/>
+
+  <!-- ================= LIFELINES (Vertical Dashed Lines) ================= -->
+  <line x1="100" y1="80" x2="100" y2="650" stroke="#000000" stroke-width="1" stroke-dasharray="4,4"/>
+  <line x1="320" y1="80" x2="320" y2="650" stroke="#000000" stroke-width="1" stroke-dasharray="4,4"/>
+  <line x1="590" y1="80" x2="590" y2="650" stroke="#000000" stroke-width="1" stroke-dasharray="4,4"/>
+  <line x1="840" y1="80" x2="840" y2="650" stroke="#000000" stroke-width="1" stroke-dasharray="4,4"/>
+
+  <!-- ================= PARTICIPANT BOXES (Top) ================= -->
+  <!-- Usuario (Actor Style Box) -->
+  <g transform="translate(40, 20)">
+    <rect width="120" height="40" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+    <text x="60" y="24" font-family="Courier, monospace" font-size="12" font-weight="bold" text-anchor="middle">Usuario</text>
+  </g>
+  <!-- Navegador -->
+  <g transform="translate(250, 20)">
+    <rect width="140" height="40" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+    <text x="70" y="24" font-family="Courier, monospace" font-size="12" font-weight="bold" text-anchor="middle">Navegador (UI)</text>
+  </g>
+  <!-- Blueprint -->
+  <g transform="translate(500, 20)">
+    <rect width="180" height="40" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+    <text x="90" y="24" font-family="Courier, monospace" font-size="12" font-weight="bold" text-anchor="middle">transactions.py</text>
+  </g>
+  <!-- Sirope -->
+  <g transform="translate(770, 20)">
+    <rect width="140" height="40" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+    <text x="70" y="24" font-family="Courier, monospace" font-size="12" font-weight="bold" text-anchor="middle">Sirope (DB)</text>
+  </g>
+
+  <!-- ================= PARTICIPANT BOXES (Bottom) ================= -->
+  <g transform="translate(40, 650)">
+    <rect width="120" height="30" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+    <text x="60" y="18" font-family="Courier, monospace" font-size="11" font-weight="bold" text-anchor="middle">Usuario</text>
+  </g>
+  <g transform="translate(250, 650)">
+    <rect width="140" height="30" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+    <text x="70" y="18" font-family="Courier, monospace" font-size="11" font-weight="bold" text-anchor="middle">Navegador (UI)</text>
+  </g>
+  <g transform="translate(500, 650)">
+    <rect width="180" height="30" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+    <text x="90" y="18" font-family="Courier, monospace" font-size="11" font-weight="bold" text-anchor="middle">transactions.py</text>
+  </g>
+  <g transform="translate(770, 650)">
+    <rect width="140" height="30" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+    <text x="70" y="18" font-family="Courier, monospace" font-size="11" font-weight="bold" text-anchor="middle">Sirope (DB)</text>
+  </g>
+
+  <!-- ================= MESSAGES (Arrows and Text) ================= -->
+  
+  <!-- Msg 1: Usuario -> Navegador -->
+  <g transform="translate(100, 110)">
+    <line x1="0" y1="0" x2="220" y2="0" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+    <text x="110" y="-8" font-family="Courier, monospace" font-size="10" text-anchor="middle">1. Rellena formulario &amp; pulsa Guardar</text>
+  </g>
+
+  <!-- Msg 2: Navegador -> Blueprint -->
+  <g transform="translate(320, 150)">
+    <line x1="0" y1="0" x2="270" y2="0" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+    <text x="135" y="-8" font-family="Courier, monospace" font-size="10" text-anchor="middle">2. POST /transactions/ (FormData)</text>
+  </g>
+
+  <!-- Msg 3: Blueprint -> Sirope -->
+  <g transform="translate(590, 190)">
+    <line x1="0" y1="0" x2="250" y2="0" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+    <text x="125" y="-8" font-family="Courier, monospace" font-size="10" text-anchor="middle">3. srp.save(TransactionDto)</text>
+  </g>
+
+  <!-- Msg 4: Sirope Self Loop (Save/Serialize to Redis) -->
+  <g transform="translate(840, 220)">
+    <path d="M 0 0 L 40 0 L 40 30 L 0 30" fill="none" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+    <text x="50" y="18" font-family="Courier, monospace" font-size="9" text-anchor="start">4. Serializa &amp; guarda en Redis</text>
+  </g>
+
+  <!-- Msg 5: Sirope -> Blueprint (Return OID) -->
+  <g transform="translate(590, 280)">
+    <line x1="250" y1="0" x2="0" y2="0" stroke="#000000" stroke-width="1" stroke-dasharray="4,4" marker-end="url(#dashed-arrow)"/>
+    <text x="125" y="-8" font-family="Courier, monospace" font-size="10" text-anchor="middle">5. Retorna OID confirmado</text>
+  </g>
+
+  <!-- Msg 6: Blueprint Self Loop (Flash success) -->
+  <g transform="translate(590, 310)">
+    <path d="M 0 0 L 40 0 L 40 30 L 0 30" fill="none" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+    <text x="50" y="18" font-family="Courier, monospace" font-size="9" text-anchor="start">6. flask.flash("Éxito")</text>
+  </g>
+
+  <!-- Msg 7: Blueprint -> Navegador (Redirect 302) -->
+  <g transform="translate(320, 370)">
+    <line x1="270" y1="0" x2="0" y2="0" stroke="#000000" stroke-width="1" stroke-dasharray="4,4" marker-end="url(#dashed-arrow)"/>
+    <text x="135" y="-8" font-family="Courier, monospace" font-size="10" text-anchor="middle">7. 302 Redirect a /transactions/</text>
+  </g>
+
+  <!-- Msg 8: Navegador -> Blueprint (GET request) -->
+  <g transform="translate(320, 410)">
+    <line x1="0" y1="0" x2="270" y2="0" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+    <text x="135" y="-8" font-family="Courier, monospace" font-size="10" text-anchor="middle">8. GET /transactions/</text>
+  </g>
+
+  <!-- Msg 9: Blueprint -> Sirope (Filter) -->
+  <g transform="translate(590, 450)">
+    <line x1="0" y1="0" x2="250" y2="0" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+    <text x="125" y="-8" font-family="Courier, monospace" font-size="10" text-anchor="middle">9. srp.filter(TransactionDto)</text>
+  </g>
+
+  <!-- Msg 10: Sirope -> Blueprint (List DTOs) -->
+  <g transform="translate(590, 490)">
+    <line x1="250" y1="0" x2="0" y2="0" stroke="#000000" stroke-width="1" stroke-dasharray="4,4" marker-end="url(#dashed-arrow)"/>
+    <text x="125" y="-8" font-family="Courier, monospace" font-size="10" text-anchor="middle">10. Lista de transacciones</text>
+  </g>
+
+  <!-- Msg 11: Blueprint -> Navegador (Render HTML) -->
+  <g transform="translate(320, 530)">
+    <line x1="270" y1="0" x2="0" y2="0" stroke="#000000" stroke-width="1" stroke-dasharray="4,4" marker-end="url(#dashed-arrow)"/>
+    <text x="135" y="-8" font-family="Courier, monospace" font-size="10" text-anchor="middle">11. render_template("transactions.html")</text>
+  </g>
+
+  <!-- Msg 12: Navegador -> Usuario (Update View) -->
+  <g transform="translate(100, 570)">
+    <line x1="220" y1="0" x2="0" y2="0" stroke="#000000" stroke-width="1" stroke-dasharray="4,4" marker-end="url(#dashed-arrow)"/>
+    <text x="110" y="-8" font-family="Courier, monospace" font-size="10" text-anchor="middle">12. Visualiza la tabla y Toast flotante</text>
+  </g>
+
+</svg>

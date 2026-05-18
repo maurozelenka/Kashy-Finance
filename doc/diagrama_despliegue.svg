@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 600" width="100%" height="100%">
+  <!-- Definitions for Arrowheads -->
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#000000"/>
+    </marker>
+    <marker id="dashed-arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="none" stroke="#000000" stroke-width="1"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1100" height="600" fill="#ffffff"/>
+
+  <!-- ================= ENTORNO DE PRODUCCIÓN (Dotted Box Boundary) ================= -->
+  <rect x="520" y="40" width="530" height="520" fill="none" stroke="#000000" stroke-width="1.2" stroke-dasharray="6,6" rx="5"/>
+  <text x="785" y="65" font-family="Courier, monospace" font-size="12" font-weight="bold" text-anchor="middle">Entorno de Producción en Render</text>
+
+  <!-- ================= NODES ================= -->
+
+  <!-- GitHub Repo -->
+  <g transform="translate(50, 60)">
+    <rect width="180" height="70" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+    <text x="90" y="30" font-family="Courier, monospace" font-size="12" font-weight="bold" text-anchor="middle">Repositorio GitHub</text>
+    <text x="90" y="50" font-family="Courier, monospace" font-size="10" text-anchor="middle">maurozelenka/Kashy-Finance</text>
+  </g>
+
+  <!-- Usuario Browser -->
+  <g transform="translate(50, 300)">
+    <rect width="180" height="70" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+    <text x="90" y="30" font-family="Courier, monospace" font-size="12" font-weight="bold" text-anchor="middle">Usuario (Cliente)</text>
+    <text x="90" y="50" font-family="Courier, monospace" font-size="10" text-anchor="middle">Navegador Web (HTTPS)</text>
+  </g>
+
+  <!-- DNS Server -->
+  <g transform="translate(290, 300)">
+    <rect width="180" height="70" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+    <text x="90" y="30" font-family="Courier, monospace" font-size="12" font-weight="bold" text-anchor="middle">DNS Oficial</text>
+    <text x="90" y="50" font-family="Courier, monospace" font-size="10" text-anchor="middle">kashyfinance.com (A/CNAME)</text>
+  </g>
+
+  <!-- Render Load Balancer / SSL -->
+  <g transform="translate(560, 110)">
+    <rect width="180" height="60" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+    <text x="90" y="25" font-family="Courier, monospace" font-size="11" font-weight="bold" text-anchor="middle">Balanceador de Carga</text>
+    <text x="90" y="45" font-family="Courier, monospace" font-size="10" text-anchor="middle">Render SSL termination</text>
+  </g>
+
+  <!-- Gunicorn WSGI -->
+  <g transform="translate(800, 110)">
+    <rect width="180" height="60" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+    <text x="90" y="25" font-family="Courier, monospace" font-size="11" font-weight="bold" text-anchor="middle">Servidor Gunicorn</text>
+    <text x="90" y="45" font-family="Courier, monospace" font-size="10" text-anchor="middle">WSGI (Workers)</text>
+  </g>
+
+  <!-- Flask App Factory -->
+  <g transform="translate(800, 220)">
+    <rect width="180" height="70" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+    <text x="90" y="30" font-family="Courier, monospace" font-size="12" font-weight="bold" text-anchor="middle">Aplicación Flask</text>
+    <text x="90" y="50" font-family="Courier, monospace" font-size="10" text-anchor="middle">app.py / Blueprints</text>
+  </g>
+
+  <!-- Sirope ORM -->
+  <g transform="translate(800, 340)">
+    <rect width="180" height="60" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+    <text x="90" y="25" font-family="Courier, monospace" font-size="12" font-weight="bold" text-anchor="middle">Sirope ORM</text>
+    <text x="90" y="45" font-family="Courier, monospace" font-size="10" text-anchor="middle">Gestión de OIDs</text>
+  </g>
+
+  <!-- Datastores Boundary -->
+  <rect x="780" y="430" width="220" height="110" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="4,4" rx="3"/>
+  <text x="890" y="445" font-family="Courier, monospace" font-size="9" font-weight="bold" text-anchor="middle">Capa de Datos (Redis)</text>
+
+  <!-- Real Redis -->
+  <g transform="translate(790, 465)">
+    <rect width="90" height="60" fill="#ffffff" stroke="#000000" stroke-width="1.2"/>
+    <text x="45" y="25" font-family="Courier, monospace" font-size="10" font-weight="bold" text-anchor="middle">Redis Server</text>
+    <text x="45" y="45" font-family="Courier, monospace" font-size="9" text-anchor="middle">(Producción)</text>
+  </g>
+
+  <!-- FakeRedis -->
+  <g transform="translate(900, 465)">
+    <rect width="90" height="60" fill="#ffffff" stroke="#000000" stroke-width="1.2"/>
+    <text x="45" y="25" font-family="Courier, monospace" font-size="10" font-weight="bold" text-anchor="middle">FakeRedis</text>
+    <text x="45" y="45" font-family="Courier, monospace" font-size="9" text-anchor="middle">(Fallback/Mem)</text>
+  </g>
+
+  <!-- ================= CONNECTIONS (Lines and Arrows) ================= -->
+
+  <!-- GitHub CD trigger -> Render -->
+  <path d="M 230 95 L 650 95 L 650 110" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="4,4" marker-end="url(#dashed-arrow)"/>
+  <text x="440" y="85" font-family="Courier, monospace" font-size="9" text-anchor="middle">1. GitHub Webhook (Auto-Deploy)</text>
+
+  <!-- User -> DNS Server -->
+  <path d="M 140 370 L 140 420 L 380 420 L 380 370" fill="none" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="260" y="415" font-family="Courier, monospace" font-size="9" text-anchor="middle">2. Resuelve kashyfinance.com</text>
+
+  <!-- User request -> Load Balancer -->
+  <path d="M 180 300 L 180 210 L 650 210 L 650 170" fill="none" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="395" y="200" font-family="Courier, monospace" font-size="9" text-anchor="middle">3. Petición HTTPS (SSL)</text>
+
+  <!-- Load Balancer -> Gunicorn -->
+  <path d="M 740 140 L 800 140" fill="none" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="770" y="132" font-family="Courier, monospace" font-size="9" text-anchor="middle">WSGI</text>
+
+  <!-- Gunicorn -> Flask App -->
+  <path d="M 890 170 L 890 220" fill="none" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="900" y="200" font-family="Courier, monospace" font-size="9" text-anchor="start">Invocación</text>
+
+  <!-- Flask App -> Sirope -->
+  <path d="M 890 290 L 890 340" fill="none" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="900" y="320" font-family="Courier, monospace" font-size="9" text-anchor="start">Acceso a DTOs</text>
+
+  <!-- Sirope -> Redis Boundary -->
+  <path d="M 890 400 L 890 430" fill="none" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="900" y="415" font-family="Courier, monospace" font-size="9" text-anchor="start">Persistencia</text>
+
+  <!-- Sirope -> Real Redis (Solid line, try primary connection) -->
+  <path d="M 845 425 L 845 465" fill="none" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <!-- Sirope -> FakeRedis (Dashed line, fallback if ping fails) -->
+  <path d="M 935 425 L 935 465" fill="none" stroke="#000000" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#dashed-arrow)"/>
+  <text x="955" y="445" font-family="Courier, monospace" font-size="8" text-anchor="middle">Fallback</text>
+
+</svg>

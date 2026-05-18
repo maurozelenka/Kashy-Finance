@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 800" width="100%" height="100%">
+  <!-- Definitions for Arrowheads -->
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="none" stroke="#000000" stroke-width="1.2"/>
+    </marker>
+  </defs>
+
+  <!-- Background Grid -->
+  <rect width="1100" height="800" fill="#ffffff"/>
+
+  <!-- ================= USER DTO BOX ================= -->
+  <g transform="translate(370, 20)">
+    <rect width="220" height="150" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+    <text x="110" y="25" font-family="Courier, monospace" font-size="14" font-weight="bold" text-anchor="middle">UserDto</text>
+    <line x1="0" y1="35" x2="220" y2="35" stroke="#000000" stroke-width="1"/>
+    <text x="10" y="50" font-family="Courier, monospace" font-size="11">- _email: String</text>
+    <text x="10" y="65" font-family="Courier, monospace" font-size="11">- _password_hash: String</text>
+    <text x="10" y="80" font-family="Courier, monospace" font-size="11">- _theme: String</text>
+    <text x="10" y="95" font-family="Courier, monospace" font-size="11">- _language: String</text>
+    <text x="10" y="110" font-family="Courier, monospace" font-size="11">- _avatar_path: String</text>
+    <line x1="0" y1="120" x2="220" y2="120" stroke="#000000" stroke-width="1"/>
+    <text x="10" y="135" font-family="Courier, monospace" font-size="11">+ get_id(): String</text>
+  </g>
+
+  <!-- ================= SAVINGS GOAL DTO BOX ================= -->
+  <g transform="translate(370, 240)">
+    <rect width="220" height="150" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+    <text x="110" y="25" font-family="Courier, monospace" font-size="14" font-weight="bold" text-anchor="middle">SavingsGoalDto</text>
+    <line x1="0" y1="35" x2="220" y2="35" stroke="#000000" stroke-width="1"/>
+    <text x="10" y="50" font-family="Courier, monospace" font-size="11">- _name: String</text>
+    <text x="10" y="65" font-family="Courier, monospace" font-size="11">- _target_amount: Double</text>
+    <text x="10" y="80" font-family="Courier, monospace" font-size="11">- _current_amount: Double</text>
+    <text x="10" y="95" font-family="Courier, monospace" font-size="11">- _icon: String</text>
+    <text x="10" y="110" font-family="Courier, monospace" font-size="11">- _color: String</text>
+    <text x="10" y="125" font-family="Courier, monospace" font-size="11">- _user_oid: String</text>
+  </g>
+
+  <!-- ================= ACCOUNT DTO BOX ================= -->
+  <g transform="translate(40, 240)">
+    <rect width="220" height="120" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+    <text x="110" y="25" font-family="Courier, monospace" font-size="14" font-weight="bold" text-anchor="middle">AccountDto</text>
+    <line x1="0" y1="35" x2="220" y2="35" stroke="#000000" stroke-width="1"/>
+    <text x="10" y="50" font-family="Courier, monospace" font-size="11">- _name: String</text>
+    <text x="10" y="65" font-family="Courier, monospace" font-size="11">- _initial_balance: Double</text>
+    <text x="10" y="80" font-family="Courier, monospace" font-size="11">- _user_oid: String</text>
+  </g>
+
+  <!-- ================= CATEGORY DTO BOX ================= -->
+  <g transform="translate(700, 240)">
+    <rect width="220" height="150" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+    <text x="110" y="25" font-family="Courier, monospace" font-size="14" font-weight="bold" text-anchor="middle">CategoryDto</text>
+    <line x1="0" y1="35" x2="220" y2="35" stroke="#000000" stroke-width="1"/>
+    <text x="10" y="50" font-family="Courier, monospace" font-size="11">- _name: String</text>
+    <text x="10" y="65" font-family="Courier, monospace" font-size="11">- _cat_type: String</text>
+    <text x="10" y="80" font-family="Courier, monospace" font-size="11">- _color: String</text>
+    <text x="10" y="95" font-family="Courier, monospace" font-size="11">- _icon: String</text>
+    <text x="10" y="110" font-family="Courier, monospace" font-size="11">- _user_oid: String</text>
+  </g>
+
+  <!-- ================= TRANSACTION DTO BOX ================= -->
+  <g transform="translate(190, 520)">
+    <rect width="240" height="170" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+    <text x="120" y="25" font-family="Courier, monospace" font-size="14" font-weight="bold" text-anchor="middle">TransactionDto</text>
+    <line x1="0" y1="35" x2="240" y2="35" stroke="#000000" stroke-width="1"/>
+    <text x="10" y="50" font-family="Courier, monospace" font-size="11">- _amount: Double</text>
+    <text x="10" y="65" font-family="Courier, monospace" font-size="11">- _notes: String</text>
+    <text x="10" y="80" font-family="Courier, monospace" font-size="11">- _date_str: String</text>
+    <text x="10" y="95" font-family="Courier, monospace" font-size="11">- _cat_oid: String</text>
+    <text x="10" y="110" font-family="Courier, monospace" font-size="11">- _acc_oid: String</text>
+    <text x="10" y="125" font-family="Courier, monospace" font-size="11">- _user_oid: String</text>
+  </g>
+
+  <!-- ================= BUDGET DTO BOX ================= -->
+  <g transform="translate(580, 520)">
+    <rect width="220" height="120" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+    <text x="110" y="25" font-family="Courier, monospace" font-size="14" font-weight="bold" text-anchor="middle">BudgetDto</text>
+    <line x1="0" y1="35" x2="220" y2="35" stroke="#000000" stroke-width="1"/>
+    <text x="10" y="50" font-family="Courier, monospace" font-size="11">- _amount: Double</text>
+    <text x="10" y="65" font-family="Courier, monospace" font-size="11">- _cat_oid: String</text>
+    <text x="10" y="80" font-family="Courier, monospace" font-size="11">- _user_oid: String</text>
+  </g>
+
+  <!-- ================= ORTHOGONAL RELATIONSHIP LINES ================= -->
+  
+  <!-- 1. UserDto to AccountDto -->
+  <path d="M 480 170 L 480 200 L 150 200 L 150 240" fill="none" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="460" y="195" font-family="Courier, monospace" font-size="10">1</text>
+  <text x="160" y="225" font-family="Courier, monospace" font-size="10">*</text>
+  <text x="240" y="192" font-family="Courier, monospace" font-size="10">propietario de</text>
+
+  <!-- 2. UserDto to SavingsGoalDto -->
+  <path d="M 480 170 L 480 240" fill="none" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="490" y="190" font-family="Courier, monospace" font-size="10">1</text>
+  <text x="490" y="225" font-family="Courier, monospace" font-size="10">*</text>
+  <text x="495" y="205" font-family="Courier, monospace" font-size="10">persigue</text>
+
+  <!-- 3. UserDto to CategoryDto -->
+  <path d="M 480 170 L 480 200 L 810 200 L 810 240" fill="none" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="495" y="195" font-family="Courier, monospace" font-size="10">1</text>
+  <text x="820" y="225" font-family="Courier, monospace" font-size="10">*</text>
+  <text x="670" y="192" font-family="Courier, monospace" font-size="10">define</text>
+
+  <!-- 4. UserDto to TransactionDto -->
+  <path d="M 370 95 L 320 95 L 320 500 L 250 500 L 250 520" fill="none" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="355" y="90" font-family="Courier, monospace" font-size="10">1</text>
+  <text x="235" y="510" font-family="Courier, monospace" font-size="10">*</text>
+  <text x="250" y="492" font-family="Courier, monospace" font-size="10">registra</text>
+
+  <!-- 5. UserDto to BudgetDto -->
+  <path d="M 590 95 L 640 95 L 640 500 L 610 500 L 610 520" fill="none" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="600" y="90" font-family="Courier, monospace" font-size="10">1</text>
+  <text x="620" y="510" font-family="Courier, monospace" font-size="10">*</text>
+  <text x="540" y="492" font-family="Courier, monospace" font-size="10">establece</text>
+
+  <!-- 6. AccountDto to TransactionDto -->
+  <path d="M 150 360 L 150 470 L 310 470 L 310 520" fill="none" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="160" y="375" font-family="Courier, monospace" font-size="10">1</text>
+  <text x="320" y="505" font-family="Courier, monospace" font-size="10">*</text>
+  <text x="200" y="462" font-family="Courier, monospace" font-size="10">agrupa movimientos de</text>
+
+  <!-- 7. CategoryDto to TransactionDto -->
+  <path d="M 810 390 L 810 470 L 370 470 L 370 520" fill="none" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="820" y="405" font-family="Courier, monospace" font-size="10">1</text>
+  <text x="380" y="505" font-family="Courier, monospace" font-size="10">*</text>
+  <text x="640" y="462" font-family="Courier, monospace" font-size="10">clasifica</text>
+
+  <!-- 8. CategoryDto to BudgetDto -->
+  <path d="M 810 390 L 810 470 L 690 470 L 690 520" fill="none" stroke="#000000" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="795" y="405" font-family="Courier, monospace" font-size="10">1</text>
+  <text x="700" y="505" font-family="Courier, monospace" font-size="10">1</text>
+  <text x="715" y="490" font-family="Courier, monospace" font-size="10">monitorea</text>
+
+</svg>
