@@ -5,7 +5,7 @@ echo "==================================================="
 echo ""
 cd "$(dirname "$0")/../src"
 echo "[+] Instalando dependencias necesarias..."
-pip install -r requirements.txt
+python3 -m pip install -r requirements.txt || python -m pip install -r requirements.txt
 echo ""
 echo "[+] Ejecutando el servidor de pruebas de Flask..."
-flask run
+python3 -m flask run || python -m flask run

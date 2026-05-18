@@ -5,8 +5,8 @@ echo ===================================================
 echo.
 cd %~dp0..\src
 echo [+] Instalando dependencias necesarias...
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 echo.
 echo [+] Ejecutando el servidor de pruebas de Flask...
-flask run
+python -m flask run
 pause
