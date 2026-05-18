@@ -3,6 +3,7 @@ echo ===================================================
 echo   Kashy Finance - Iniciando Servidor Local
 echo ===================================================
 echo.
+set PYTHONDONTWRITEBYTECODE=1
 cd %~dp0..\src
 echo [+] Instalando dependencias necesarias...
 python -m pip install -r requirements.txt
