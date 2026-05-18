@@ -21,17 +21,33 @@ def create_app():
     import sirope.safeindex
 
     redis_url = os.environ.get('REDIS_URL')
+    connected = False
+    
+    # 1. Intentar conectar usando REDIS_URL (Entorno de Producción o Configurado)
     if redis_url:
         try:
             r = redis.from_url(redis_url)
             r.ping()
             srp = sirope.Sirope(redis_obj=r)
+            print("🔋 Conectado con éxito a la base de datos Redis externa (REDIS_URL).")
+            connected = True
+        except Exception as e:
+            print(f"⚠️ Error al conectar a REDIS_URL: {e}")
+            
+    # 2. Si no hay REDIS_URL, intentar conectar al Redis local estándar (localhost:6379)
+    if not connected:
+        try:
+            r = redis.Redis(host='localhost', port=6379, socket_connect_timeout=1)
+            r.ping()
+            srp = sirope.Sirope(redis_obj=r)
+            print("🔌 Conectado con éxito al servidor Redis local en localhost:6379 (Persistencia real).")
+            connected = True
         except Exception:
-            print("⚠️ Error con REDIS_URL. Usando fakeredis...")
-            sirope.safeindex.SafeIndex.instance = None
-            srp = sirope.Sirope(redis_obj=fakeredis.FakeRedis())
-    else:
-        print("ℹ️ REDIS_URL no encontrada. Usando fakeredis...")
+            print("ℹ️ No se detectó un servidor Redis local activo en localhost:6379.")
+            
+    # 3. Fallback definitivo a fakeredis para asegurar ejecución out-of-the-box sin dependencias
+    if not connected:
+        print("💡 Usando emulador 'fakeredis' en memoria para garantizar ejecución out-of-the-box sin dependencias locales.")
         sirope.safeindex.SafeIndex.instance = None
         srp = sirope.Sirope(redis_obj=fakeredis.FakeRedis())
     
