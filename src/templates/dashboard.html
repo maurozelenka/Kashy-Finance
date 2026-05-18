@@ -151,7 +151,7 @@
                                 <div class="flex-1 w-full flex items-end justify-center pb-2">
                                     {% if d.net > 0 %}
                                     <div class="chart-tooltip">{{ '%+.2f'|format(d.net) }} €</div>
-                                    <div class="bar-3d-container w-10 sm:w-12" style="animation-delay: {{ 0.2 + (loop.index0 * 0.08) }}s;">
+                                    <div class="bar-3d-container w-10 sm:w-12 h-full" style="animation-delay: {{ 0.2 + (loop.index0 * 0.08) }}s;">
                                         <div class="bar-3d bg-success origin-bottom" style="height: {{ (d.abs / week_max * 100)|int }}%;">
                                             <div class="bar-3d-front bg-success"></div>
                                         </div>
@@ -168,7 +168,7 @@
                                 <div class="flex-1 w-full flex items-start justify-center pt-2">
                                     {% if d.net < 0 %}
                                     <div class="chart-tooltip tooltip-below">{{ '%+.2f'|format(d.net) }} €</div>
-                                    <div class="bar-3d-container w-10 sm:w-12" style="animation-delay: {{ 0.2 + (loop.index0 * 0.08) }}s;">
+                                    <div class="bar-3d-container w-10 sm:w-12 h-full" style="animation-delay: {{ 0.2 + (loop.index0 * 0.08) }}s;">
                                         <div class="bar-3d bg-error origin-top" style="height: {{ (d.abs / week_max * 100)|int }}%;">
                                             <div class="bar-3d-front bg-error"></div>
                                         </div>
@@ -434,7 +434,6 @@
             .bar-3d {
                 position: relative;
                 transform-style: preserve-3d;
-                height: 0;
                 animation: growBar3D 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
             }
 
