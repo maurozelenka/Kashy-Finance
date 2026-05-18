@@ -330,7 +330,7 @@
                     <div class="absolute right-0 top-full mt-2 w-80 bg-[#0F0F0F] border border-white/10 rounded-2xl p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 z-50 shadow-2xl backdrop-blur-xl">
                         <div class="px-4 py-3 border-b border-white/5 flex justify-between items-center">
                             <span class="text-sm font-bold text-white">{{ 'Notifications' if current_user.language == 'en' else 'Notificaciones' }}</span>
-                            <span class="bg-primary/20 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full">3 {{ 'New' if current_user.language == 'en' else 'Nuevas' }}</span>
+                            <span class="bg-primary/20 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full notification-badge">3 {{ 'New' if current_user.language == 'en' else 'Nuevas' }}</span>
                         </div>
                         <div class="flex flex-col gap-1 p-2">
                             <a href="#" class="flex gap-3 items-start p-2 rounded-xl hover:bg-white/5 transition-colors group/item">
@@ -362,7 +362,7 @@
                             </a>
                         </div>
                         <div class="px-4 py-2 border-t border-white/5 text-center">
-                            <a href="javascript:void(0)" onclick="const dot = this.closest('.relative.group').querySelector('.bg-primary.rounded-full'); if (dot) dot.remove(); const badge = this.closest('.relative.group').querySelector('.bg-primary\\/20'); if (badge) badge.textContent = '0 {{ \'New\' if current_user.language == \'en\' else \'Nuevas\' }}'; this.closest('.absolute').querySelectorAll('.flex-col a').forEach(a => a.style.opacity = '0.5');" class="text-[10px] font-bold text-neutral-500 hover:text-white transition-colors uppercase tracking-widest">{{ 'Mark all as read' if current_user.language == 'en' else 'Marcar todas como leídas' }}</a>
+                            <a href="javascript:void(0)" onclick="const dot = this.closest('.relative.group').querySelector('.bg-primary.rounded-full'); if (dot) dot.remove(); const badge = this.closest('.relative.group').querySelector('.notification-badge'); if (badge) badge.textContent = '0 {{ "New" if current_user.language == "en" else "Nuevas" }}'; this.closest('.absolute').querySelectorAll('.flex-col a').forEach(a => a.style.opacity = '0.5');" class="text-[10px] font-bold text-neutral-500 hover:text-white transition-colors uppercase tracking-widest">{{ 'Mark all as read' if current_user.language == 'en' else 'Marcar todas como leídas' }}</a>
                         </div>
                     </div>
                 </div>
