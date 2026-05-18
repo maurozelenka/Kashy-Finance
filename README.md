@@ -1,4 +1,4 @@
-﻿# 💎 Kashy Finance | Gestión Patrimonial Premium
+# 💎 Kashy Finance | Gestión Patrimonial Premium
 
 [![Status](https://img.shields.io/badge/Status-Live-emerald?style=for-the-badge&logo=render)](https://kashyfinance.com)
 [![Version](https://img.shields.io/badge/Version-1.1.0-blueviolet?style=for-the-badge)](https://kashyfinance.com)

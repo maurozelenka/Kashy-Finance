@@ -261,10 +261,16 @@
                 <span class="material-symbols-outlined text-[20px]" {% if request.endpoint == 'savings.index' %}style="font-variation-settings: 'FILL' 1;"{% endif %}>schedule</span>
                 <span class="text-sm">{{ 'Savings' if current_user.language == 'en' else 'Ahorro' }}</span>
             </a>
-            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-neutral-400 hover:text-white hover:bg-white/5 font-semibold">
-                <span class="material-symbols-outlined text-[20px]">monitoring</span>
-                <span class="text-sm">{{ 'Reports' if current_user.language == 'en' else 'Informes' }}</span>
-            </a>
+            <div class="flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all text-neutral-600 font-semibold cursor-not-allowed select-none relative group" title="{{ 'Available soon' if current_user.language == 'en' else 'Disponible pronto' }}">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-[20px] text-neutral-600">monitoring</span>
+                    <span class="text-sm text-neutral-600">{{ 'Reports' if current_user.language == 'en' else 'Informes' }}</span>
+                </div>
+                <div class="flex items-center gap-1.5 ml-auto shrink-0">
+                    <span class="material-symbols-outlined text-[16px] text-neutral-600">lock</span>
+                    <span class="text-[9px] bg-neutral-800 text-neutral-500 px-1.5 py-0.5 rounded uppercase font-bold tracking-wider font-jakarta">{{ 'Soon' if current_user.language == 'en' else 'Pronto' }}</span>
+                </div>
+            </div>
         </nav>
 
         </nav>
@@ -356,7 +362,7 @@
                             </a>
                         </div>
                         <div class="px-4 py-2 border-t border-white/5 text-center">
-                            <a href="#" class="text-[10px] font-bold text-neutral-500 hover:text-white transition-colors uppercase tracking-widest">Marcar todas como leídas</a>
+                            <a href="javascript:void(0)" onclick="const dot = this.closest('.relative.group').querySelector('.bg-primary.rounded-full'); if (dot) dot.remove(); const badge = this.closest('.relative.group').querySelector('.bg-primary\\/20'); if (badge) badge.textContent = '0 {{ \'New\' if current_user.language == \'en\' else \'Nuevas\' }}'; this.closest('.absolute').querySelectorAll('.flex-col a').forEach(a => a.style.opacity = '0.5');" class="text-[10px] font-bold text-neutral-500 hover:text-white transition-colors uppercase tracking-widest">{{ 'Mark all as read' if current_user.language == 'en' else 'Marcar todas como leídas' }}</a>
                         </div>
                     </div>
                 </div>
