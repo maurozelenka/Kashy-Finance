@@ -76,6 +76,30 @@ def index():
         })
     week_max = max((d["abs"] for d in chart_week), default=1) or 1
 
+    # === CÁLCULO DINÁMICO DE TARJETAS DE RESUMEN SEMANAL ===
+    semana_start = (hoy - datetime.timedelta(days=6)).isoformat()
+    semana_end = (hoy + datetime.timedelta(days=1)).isoformat()
+    
+    income_semana = sum(t.amount for t in transacciones if t.amount > 0 and semana_start <= t.date_str < semana_end)
+    expense_semana = sum(abs(t.amount) for t in transacciones if t.amount < 0 and semana_start <= t.date_str < semana_end)
+    savings_semana = income_semana - expense_semana
+
+    prev_semana_start = (hoy - datetime.timedelta(days=13)).isoformat()
+    prev_semana_end = (hoy - datetime.timedelta(days=6)).isoformat()
+    
+    prev_income_semana = sum(t.amount for t in transacciones if t.amount > 0 and prev_semana_start <= t.date_str < prev_semana_end)
+    prev_expense_semana = sum(abs(t.amount) for t in transacciones if t.amount < 0 and prev_semana_start <= t.date_str < prev_semana_end)
+    prev_savings_semana = prev_income_semana - prev_expense_semana
+
+    def calc_pct_change(curr, prev):
+        if prev != 0:
+            return ((curr - prev) / abs(prev)) * 100
+        return 100.0 if curr > 0 else (-100.0 if curr < 0 else 0.0)
+
+    income_change_pct = calc_pct_change(income_semana, prev_income_semana)
+    expense_change_pct = calc_pct_change(expense_semana, prev_expense_semana)
+    savings_change_pct = calc_pct_change(savings_semana, prev_savings_semana)
+
     # === VISTA MES: Cuadrícula del mes seleccionado ===
     primer_dia_mes = view_date.replace(day=1)
     if req_month == 12:
@@ -313,6 +337,12 @@ def index():
         "saldo_total_decimal": saldo_total_decimal,
         "income_mensual": income_mensual,
         "expense_mensual": expense_mensual,
+        "income_semana": income_semana,
+        "expense_semana": expense_semana,
+        "savings_semana": savings_semana,
+        "income_change_pct": income_change_pct,
+        "expense_change_pct": expense_change_pct,
+        "savings_change_pct": savings_change_pct,
         "chart_week": chart_week,
         "week_max": week_max,
         "chart_month": chart_month,

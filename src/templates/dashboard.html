@@ -152,7 +152,7 @@
                                     {% if d.net > 0 %}
                                     <div class="chart-tooltip">{{ '%+.2f'|format(d.net) }} €</div>
                                     <div class="bar-3d-container w-10 sm:w-12" style="animation-delay: {{ 0.2 + (loop.index0 * 0.08) }}s;">
-                                        <div class="bar-3d bg-success" style="--target-height: {{ (d.abs / week_max * 100)|int }}%;">
+                                        <div class="bar-3d bg-success origin-bottom" style="height: {{ (d.abs / week_max * 100)|int }}%;">
                                             <div class="bar-3d-front bg-success"></div>
                                         </div>
                                     </div>
@@ -169,7 +169,7 @@
                                     {% if d.net < 0 %}
                                     <div class="chart-tooltip tooltip-below">{{ '%+.2f'|format(d.net) }} €</div>
                                     <div class="bar-3d-container w-10 sm:w-12" style="animation-delay: {{ 0.2 + (loop.index0 * 0.08) }}s;">
-                                        <div class="bar-3d bg-error" style="--target-height: {{ (d.abs / week_max * 100)|int }}%;">
+                                        <div class="bar-3d bg-error origin-top" style="height: {{ (d.abs / week_max * 100)|int }}%;">
                                             <div class="bar-3d-front bg-error"></div>
                                         </div>
                                     </div>
@@ -251,8 +251,8 @@
                         <div class="flex-1 w-full flex items-end relative group">
                             {% if not d.future and d.net > 0 %}
                             <div class="chart-tooltip">{{ '%+.2f'|format(d.net) }} €</div>
-                            <div class="w-full bg-gradient-to-t from-success/40 to-success/10 border-x border-t border-success/30 rounded-t-md transition-all hover:from-success/50 grow-bar-up"
-                                 style="--target-height: {{ (d.abs / year_max * 100)|int }}%;"></div>
+                            <div class="w-full bg-gradient-to-t from-success/40 to-success/10 border-x border-t border-success/30 rounded-t-md transition-all hover:from-success/50 grow-bar-up origin-bottom"
+                                 style="height: {{ (d.abs / year_max * 100)|int }}%;"></div>
                             {% endif %}
                         </div>
 
@@ -265,8 +265,8 @@
                         <div class="flex-1 w-full flex items-start relative group">
                             {% if not d.future and d.net < 0 %}
                             <div class="chart-tooltip tooltip-below">{{ '%+.2f'|format(d.net) }} €</div>
-                            <div class="w-full bg-gradient-to-b from-error/40 to-error/10 border-x border-b border-error/30 rounded-b-md transition-all hover:from-error/50 grow-bar-up"
-                                 style="--target-height: {{ (d.abs / year_max * 100)|int }}%;"></div>
+                            <div class="w-full bg-gradient-to-b from-error/40 to-error/10 border-x border-b border-error/30 rounded-b-md transition-all hover:from-error/50 grow-bar-up origin-top"
+                                 style="height: {{ (d.abs / year_max * 100)|int }}%;"></div>
                             {% endif %}
                         </div>
                     </div>
@@ -292,8 +292,8 @@
                         {% if not d.es_futuro and d.net > 0 %}
                             <div class="chart-tooltip">{{ "%.0f"|format(d.net) }}€</div>
                             <!-- Barra Verde Estilo App -->
-                            <div class="w-full bg-gradient-to-t from-success/40 to-success/20 border-x border-t border-success/30 rounded-t-sm transition-all hover:from-success/60 grow-bar-up"
-                                 style="--target-height: {{ (d.abs / wealth_max * 85)|int }}%;"></div>
+                            <div class="w-full bg-gradient-to-t from-success/40 to-success/20 border-x border-t border-success/30 rounded-t-sm transition-all hover:from-success/60 grow-bar-up origin-bottom"
+                                 style="height: {{ (d.abs / wealth_max * 85)|int }}%;"></div>
                         {% elif d.es_futuro %}
                             <!-- Barra vacía para años futuros -->
                             <div class="w-full bg-white/5 border-x border-t border-dashed border-white/10 rounded-t-sm" style="height: 5%;"></div>
@@ -312,28 +312,43 @@
                 <div class="bg-white/5 border border-white/5 rounded-2xl p-5 hover:bg-white/10 transition-colors">
                     <p class="text-[10px] font-bold text-success tracking-widest mb-2">{{ 'INCOME' if current_user.language == 'en' else 'INGRESOS' }}</p>
                     <div class="flex justify-between items-center mb-1">
-                        <h4 class="text-xl font-bold font-outfit text-white">+10.00 €</h4>
-                        <span class="material-symbols-outlined text-success">trending_up</span>
+                        <h4 class="text-xl font-bold font-outfit text-white">+{{ "%.2f"|format(income_semana) }} €</h4>
+                        <span class="material-symbols-outlined text-success">{% if income_change_pct >= 0 %}trending_up{% else %}trending_down{% endif %}</span>
                     </div>
-                    <p class="text-[10px] text-neutral-500"><span class="text-success font-semibold">+100%</span> {{ 'vs last week' if current_user.language == 'en' else 'vs semana pasada' }}</p>
+                    <p class="text-[10px] text-neutral-500">
+                        <span class="{% if income_change_pct >= 0 %}text-success{% else %}text-error{% endif %} font-semibold">
+                            {{ "%+.1f"|format(income_change_pct) }}%
+                        </span> 
+                        {{ 'vs last week' if current_user.language == 'en' else 'vs semana pasada' }}
+                    </p>
                 </div>
                 <!-- Gastos -->
                 <div class="bg-white/5 border border-white/5 rounded-2xl p-5 hover:bg-white/10 transition-colors">
                     <p class="text-[10px] font-bold text-error tracking-widest mb-2">{{ 'EXPENSES' if current_user.language == 'en' else 'GASTOS' }}</p>
                     <div class="flex justify-between items-center mb-1">
-                        <h4 class="text-xl font-bold font-outfit text-white">-0.00 €</h4>
-                        <span class="material-symbols-outlined text-error">trending_down</span>
+                        <h4 class="text-xl font-bold font-outfit text-white">-{{ "%.2f"|format(expense_semana) }} €</h4>
+                        <span class="material-symbols-outlined text-error">{% if expense_change_pct >= 0 %}trending_up{% else %}trending_down{% endif %}</span>
                     </div>
-                    <p class="text-[10px] text-neutral-500"><span class="text-error font-semibold">+0%</span> {{ 'vs last week' if current_user.language == 'en' else 'vs semana pasada' }}</p>
+                    <p class="text-[10px] text-neutral-500">
+                        <span class="{% if expense_change_pct >= 0 %}text-error{% else %}text-success{% endif %} font-semibold">
+                            {{ "%+.1f"|format(expense_change_pct) }}%
+                        </span> 
+                        {{ 'vs last week' if current_user.language == 'en' else 'vs semana pasada' }}
+                    </p>
                 </div>
                 <!-- Ahorros -->
                 <div class="bg-white/5 border border-white/5 rounded-2xl p-5 hover:bg-white/10 transition-colors">
                     <p class="text-[10px] font-bold text-primary tracking-widest mb-2">{{ 'SAVINGS' if current_user.language == 'en' else 'AHORROS' }}</p>
                     <div class="flex justify-between items-center mb-1">
-                        <h4 class="text-xl font-bold font-outfit text-white">+10.00 €</h4>
-                        <span class="material-symbols-outlined text-primary">trending_up</span>
+                        <h4 class="text-xl font-bold font-outfit text-white">{% if savings_semana >= 0 %}+{% endif %}{{ "%.2f"|format(savings_semana) }} €</h4>
+                        <span class="material-symbols-outlined text-primary">{% if savings_change_pct >= 0 %}trending_up{% else %}trending_down{% endif %}</span>
                     </div>
-                    <p class="text-[10px] text-neutral-500"><span class="text-success font-semibold">+100%</span> {{ 'vs last week' if current_user.language == 'en' else 'vs semana pasada' }}</p>
+                    <p class="text-[10px] text-neutral-500">
+                        <span class="{% if savings_change_pct >= 0 %}text-success{% else %}text-error{% endif %} font-semibold">
+                            {{ "%+.1f"|format(savings_change_pct) }}%
+                        </span> 
+                        {{ 'vs last week' if current_user.language == 'en' else 'vs semana pasada' }}
+                    </p>
                 </div>
             </div>
 
@@ -472,18 +487,18 @@
             }
 
             @keyframes growBar3D {
-                0% { height: 0; transform: translateZ(-20px); opacity: 0; }
-                100% { height: var(--target-height); transform: translateZ(0); opacity: 1; }
+                0% { transform: scaleY(0) translateZ(-20px); opacity: 0; }
+                100% { transform: scaleY(1) translateZ(0); opacity: 1; }
             }
 
             /* Growing Bars */
             .grow-bar-up {
-                height: 0;
                 animation: growBar 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
                 animation-delay: 0.2s;
             }
             @keyframes growBar {
-                to { height: var(--target-height); }
+                0% { transform: scaleY(0); }
+                100% { transform: scaleY(1); }
             }
 
             /* Perspective for Tilt */
